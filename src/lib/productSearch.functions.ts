@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, SAFEPRODUCTS_RUNTIME_ENV } from "./clientServerFn";
 import { z } from "zod";
 import { assertCanonicalSupabaseUrl, assertPublishableKey } from "./backendIdentity";
 import { buildMakeSearchBody, normalizeSearchResponse, unavailable } from "./searchContract";
@@ -147,7 +147,7 @@ export const searchProducts = createServerFn({ method: "POST" })
     // Server runtime env wins; build-time public VITE_* values (URL + publishable key only)
     // are a fallback when hosting does not inject them. Identity guards still fail closed.
     const runtime = resolveSearchRuntimeConfig(
-      mergeSearchEnv(process.env as Record<string, string | undefined>, {
+      mergeSearchEnv(SAFEPRODUCTS_RUNTIME_ENV, {
         VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
         VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       }),
@@ -156,7 +156,7 @@ export const searchProducts = createServerFn({ method: "POST" })
     if (route === "M1B") return callM1BSearch(data, query, runtime);
     // Legacy Make search remains available only while its explicit rollout flag is enabled.
     if (route !== "LEGACY_MAKE") return unavailable("NOT_QUALIFIED");
-    const url = runtime.makeSearchWebhookUrl ?? process.env.MAKE_SEARCH_WEBHOOK_URL;
+    const url = runtime.makeSearchWebhookUrl ?? SAFEPRODUCTS_RUNTIME_ENV.MAKE_SEARCH_WEBHOOK_URL;
     if (!url) return unavailable();
     try {
       const parsed = new URL(url);

@@ -14,7 +14,7 @@ import { LabelPendingResult } from "@/components/LabelPendingResult";
 import { LabelQualifiedResult } from "@/components/LabelQualifiedResult";
 import { analyzeLabel, type PendingLabelResult, type QualifiedLabelResult } from "@/lib/labels.functions";
 import { validateLabelPair, type LabelPairValidationResult } from "@/lib/labelPair.functions";
-import { useServerFn } from "@tanstack/react-start";
+import { useServerFn } from "@/lib/clientServerFn";
 import { getSessionId, logPageView } from "@/lib/sessionId";
 import { takePendingLabelCapture } from "@/lib/pendingLabelCapture";
 import { supabase } from "@/integrations/supabase/client";

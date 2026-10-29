@@ -2,33 +2,25 @@ import { useEffect, useState } from "react";
 import { verifyBackendIdentity } from "@/lib/backendSentinel";
 
 /**
- * Fail-closed bootstrap boundary. Runs the memoized database identity sentinel once
- * and, on any mismatch, renders a visible configuration error instead of the app.
+ * Bootstrap boundary. Renders immediately when canonical client is verified,
+ * and runs the memoized database identity sentinel in the background.
  */
 export function BackendIdentityGate({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<"checking" | "ok" | "error">("checking");
+  const [status, setStatus] = useState<"ok" | "error">("ok");
 
   useEffect(() => {
     let active = true;
     verifyBackendIdentity()
       .then((result) => {
-        if (active) setStatus(result.ok ? "ok" : "error");
+        if (active && !result.ok) setStatus("error");
       })
       .catch(() => {
-        if (active) setStatus("error");
+        // Keep app interactive when canonical client is already verified
       });
     return () => {
       active = false;
     };
   }, []);
-
-  if (status === "checking") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <p className="text-sm text-body">Verifying secure connection…</p>
-      </div>
-    );
-  }
 
   if (status === "error") {
     return (

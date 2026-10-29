@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, SAFEPRODUCTS_RUNTIME_ENV } from "./clientServerFn";
 import { z } from "zod";
 import { assertCanonicalSupabaseUrl, assertPublishableKey } from "@/lib/backendIdentity";
 
@@ -388,9 +388,9 @@ async function callLegacyLabel(data: z.infer<typeof inputSchema>, supabaseUrl: s
 export const analyzeLabel = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<LabelAnalysisResult> => {
-    const supabaseUrl = assertCanonicalSupabaseUrl(process.env.SUPABASE_URL, "SUPABASE_URL");
-    const publishableKey = assertPublishableKey(process.env.SUPABASE_PUBLISHABLE_KEY, "SUPABASE_PUBLISHABLE_KEY");
+    const supabaseUrl = assertCanonicalSupabaseUrl(SAFEPRODUCTS_RUNTIME_ENV.SUPABASE_URL, "SUPABASE_URL");
+    const publishableKey = assertPublishableKey(SAFEPRODUCTS_RUNTIME_ENV.SUPABASE_PUBLISHABLE_KEY, "SUPABASE_PUBLISHABLE_KEY");
     // M1-B has precedence. When enabled, never fall back to the legacy provisional-score path.
-    if (process.env.SP_M1B_LABEL_ENABLED === "true") return callM1BLabel(data, supabaseUrl, publishableKey);
+    if (SAFEPRODUCTS_RUNTIME_ENV.SP_M1B_LABEL_ENABLED === "true") return callM1BLabel(data, supabaseUrl, publishableKey);
     return callLegacyLabel(data, supabaseUrl, publishableKey);
   });

@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, SAFEPRODUCTS_RUNTIME_ENV } from "./clientServerFn";
 import { z } from "zod";
 import { assertCanonicalSupabaseUrl, assertPublishableKey } from "@/lib/backendIdentity";
 
@@ -86,8 +86,8 @@ function userMessageFromPayload(payload: Record<string, unknown>): string {
 export const validateLabelPair = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<LabelPairValidationResult> => {
-    const supabaseUrl = assertCanonicalSupabaseUrl(process.env.SUPABASE_URL, "SUPABASE_URL");
-    const publishableKey = assertPublishableKey(process.env.SUPABASE_PUBLISHABLE_KEY, "SUPABASE_PUBLISHABLE_KEY");
+    const supabaseUrl = assertCanonicalSupabaseUrl(SAFEPRODUCTS_RUNTIME_ENV.SUPABASE_URL, "SUPABASE_URL");
+    const publishableKey = assertPublishableKey(SAFEPRODUCTS_RUNTIME_ENV.SUPABASE_PUBLISHABLE_KEY, "SUPABASE_PUBLISHABLE_KEY");
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 35_000);

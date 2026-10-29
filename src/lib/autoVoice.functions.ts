@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, SAFEPRODUCTS_RUNTIME_ENV } from "./clientServerFn";
 import { z } from "zod";
 
 const MAX_AUDIO_DATA_URL_CHARS = 4_000_000;
@@ -36,12 +36,12 @@ const unavailable = (status: AutoVoiceResult["status"] = "UNAVAILABLE"): AutoVoi
 });
 
 function legacyAnonJwt() {
-  const configured = process.env.SUPABASE_ANON_KEY?.trim() || process.env.VITE_SUPABASE_ANON_KEY?.trim();
+  const configured = SAFEPRODUCTS_RUNTIME_ENV.SUPABASE_ANON_KEY?.trim() || SAFEPRODUCTS_RUNTIME_ENV.VITE_SUPABASE_ANON_KEY?.trim();
   return configured?.startsWith("eyJ") ? configured : PUBLIC_LEGACY_ANON_JWT;
 }
 
 function autoVoiceConfigured() {
-  return Boolean(process.env.OPENAI_API_KEY?.trim() || (AUTO_VOICE_EDGE_URL && legacyAnonJwt()));
+  return Boolean(SAFEPRODUCTS_RUNTIME_ENV.OPENAI_API_KEY?.trim() || (AUTO_VOICE_EDGE_URL && legacyAnonJwt()));
 }
 
 export const getAutoVoiceCapability = createServerFn({ method: "GET" }).handler(async () => ({
@@ -204,7 +204,7 @@ export const transcribeAutoVoice = createServerFn({ method: "POST" })
     const parsed = parseAudioDataUrl(data.audioDataUrl);
     if (!parsed) return unavailable("INVALID_AUDIO");
 
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    const apiKey = SAFEPRODUCTS_RUNTIME_ENV.OPENAI_API_KEY?.trim();
     if (apiKey) {
       const direct = await transcribeDirectOpenAI(parsed, apiKey);
       if (direct.ok || direct.status === "INVALID_AUDIO" || direct.status === "RATE_LIMITED") return direct;
