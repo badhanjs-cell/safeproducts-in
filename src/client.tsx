@@ -1,10 +1,19 @@
-import { StartClient } from "@tanstack/react-start/client";
-import { StrictMode } from "react";
-import { hydrateRoot } from "react-dom/client";
+import ReactDOM from "react-dom/client";
+import { RouterProvider } from "@tanstack/react-router";
+import { getRouter } from "./router";
+import "./styles.css";
 
-hydrateRoot(
-  document,
-  <StrictMode>
-    <StartClient />
-  </StrictMode>,
-);
+function mount() {
+  const rootElement = document.getElementById("root");
+  if (rootElement) {
+    const router = getRouter();
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<RouterProvider router={router} />);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", mount);
+} else {
+  mount();
+}

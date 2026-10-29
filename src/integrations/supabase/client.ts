@@ -5,12 +5,15 @@ import { assertCanonicalSupabaseUrl, assertPublishableKey } from "@/lib/backendI
 import type { SafeProductsWebDatabase } from "./webDatabase";
 import { brokeredPreviewStorage } from "./previewAuthStorage";
 
+const CANONICAL_URL_DEFAULT = "https://wmxbdirvlwuagouraobr.supabase.co";
+const CANONICAL_KEY_DEFAULT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndteGJkaXJ2bHd1YWdvdXJhb2JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTAwODgsImV4cCI6MjA5MjI2NjA4OH0.JMmfyKke6NkMYRkOsHi3WCG-_xAVvh-6BEo7v0mLMDA";
+
 const SUPABASE_URL = assertCanonicalSupabaseUrl(
-  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_URL || CANONICAL_URL_DEFAULT,
   "VITE_SUPABASE_URL",
 );
 const SUPABASE_PUBLISHABLE_KEY = assertPublishableKey(
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || CANONICAL_KEY_DEFAULT,
   "VITE_SUPABASE_PUBLISHABLE_KEY",
 );
 
