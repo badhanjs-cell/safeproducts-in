@@ -10,7 +10,7 @@
     "check:m1b": "node scripts/assert-m1b-contract.mjs && node --test tests/spM1BAuditContract.test.mjs tests/spM1BRestorationBudget.test.mjs && PYTHONDONTWRITEBYTECODE=1 python tools/m1a/test_benchmark.py",
     "check:backend": "bun run check:canonical-backend && bun run check:disclaimer && bun run check:pwa-install && bun run check:m1b",
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && node scripts/vercel-static-output.mjs",
     "build:dev": "vite build --mode development",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
