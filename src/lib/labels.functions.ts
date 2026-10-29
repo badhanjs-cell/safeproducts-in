@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { createServerFn, SAFEPRODUCTS_RUNTIME_ENV } from "./clientServerFn";
 import { z } from "zod";
 import { assertCanonicalSupabaseUrl, assertPublishableKey } from "@/lib/backendIdentity";
@@ -8,7 +7,7 @@ const dimensionSchema = z.number().int().positive().max(30_000);
 
 const inputSchema = z.object({
   imageDataUrl: z.string().min(20).max(15_000_000).regex(/^data:image\/(png|jpe?g|webp|gif);base64,/i, "Must be a base64-encoded image data URL"),
-  profile: z.enum(["ALL", "Children", "Pregnant Women", "Seniors"]),
+  profile: z.enum(["ALL", "Children", "Pregnant Women", "Pregnant Woman", "Seniors"]),
   sessionId: z.string().min(1).max(100),
   accessToken: z.string().min(20).max(8192),
   brandName: z.string().trim().min(1).max(200),
@@ -322,7 +321,7 @@ async function callLegacyLabel(data: z.infer<typeof inputSchema>, supabaseUrl: s
   }
 
   const analysisId = payload.id ?? "";
-  const analysisImageSha256 = createHash("sha256").update(data.imageDataUrl).digest("hex");
+  const analysisImageSha256 = data.ingredientImageSha256;
   let catalogSyncStatus: "SYNCED" | "PENDING" = "PENDING";
   let catalogProductId: string | undefined;
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(analysisId)) {
