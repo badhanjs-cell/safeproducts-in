@@ -1,0 +1,51 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: Build OCR image
+    args:
+      - build
+      - --no-cache
+      - -t
+      - ${_AR_HOSTNAME}/$PROJECT_ID/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+      - -f
+      - services/m1br-ocr/Dockerfile
+      - services/m1br-ocr
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push OCR image
+    args:
+      - push
+      - ${_AR_HOSTNAME}/$PROJECT_ID/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy OCR service
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --platform=managed
+      - --image=${_AR_HOSTNAME}/$PROJECT_ID/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+      - --region=${_DEPLOY_REGION}
+      - --allow-unauthenticated
+      - --cpu=2
+      - --memory=4Gi
+      - --concurrency=1
+      - --timeout=60
+      - --update-env-vars=M1BR_OCR_LANG=en,M1BR_OCR_MAX_BYTES=8388608,M1BR_OCR_MAX_PIXELS=24000000
+      - --update-secrets=M1BR_OCR_TOKEN=${_OCR_TOKEN_SECRET}:latest
+      - --labels=managed-by=cloud-build,commit-sha=$COMMIT_SHA
+      - --quiet
+
+images:
+  - ${_AR_HOSTNAME}/$PROJECT_ID/${_AR_REPOSITORY}/$REPO_NAME/${_SERVICE_NAME}:$COMMIT_SHA
+
+substitutions:
+  _SERVICE_NAME: safeproducts-m1br-ocr
+  _DEPLOY_REGION: asia-south1
+  _AR_HOSTNAME: asia-south1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _OCR_TOKEN_SECRET: safeproducts-m1br-ocr-token
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY

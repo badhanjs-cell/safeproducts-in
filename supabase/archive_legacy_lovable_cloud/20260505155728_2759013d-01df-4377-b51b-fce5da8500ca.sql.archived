@@ -1,0 +1,104 @@
+
+-- 1. Roles enum + table
+CREATE TYPE public.app_role AS ENUM ('admin', 'moderator', 'user');
+
+CREATE TABLE public.user_roles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role app_role NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (user_id, role)
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role
+  )
+$$;
+
+CREATE POLICY "users see own roles" ON public.user_roles
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "admins manage roles" ON public.user_roles
+  FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+-- 2. Updated-at trigger func
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
+$$;
+
+-- 3. Guidelines additions
+ALTER TABLE public.guidelines
+  ADD COLUMN IF NOT EXISTS content text,
+  ADD COLUMN IF NOT EXISTS age_specifics text,
+  ADD COLUMN IF NOT EXISTS source_note text,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'draft',
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
+DROP POLICY IF EXISTS "public read guidelines" ON public.guidelines;
+CREATE POLICY "public read published guidelines" ON public.guidelines
+  FOR SELECT USING (status = 'published' OR public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "admins manage guidelines" ON public.guidelines
+  FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+DROP TRIGGER IF EXISTS guidelines_updated_at ON public.guidelines;
+CREATE TRIGGER guidelines_updated_at BEFORE UPDATE ON public.guidelines
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- 4. Site announcements additions
+ALTER TABLE public.site_announcements
+  ADD COLUMN IF NOT EXISTS type text NOT NULL DEFAULT 'Did You Know Fact',
+  ADD COLUMN IF NOT EXISTS display_from date,
+  ADD COLUMN IF NOT EXISTS display_until date,
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
+
+DROP POLICY IF EXISTS "public read announcements" ON public.site_announcements;
+CREATE POLICY "public read active announcements" ON public.site_announcements
+  FOR SELECT USING (
+    (status = 'active'
+      AND (display_from IS NULL OR display_from <= CURRENT_DATE)
+      AND (display_until IS NULL OR display_until >= CURRENT_DATE))
+    OR public.has_role(auth.uid(), 'admin')
+  );
+CREATE POLICY "admins manage announcements" ON public.site_announcements
+  FOR ALL TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+-- 5. Page views additions
+ALTER TABLE public.page_views
+  ADD COLUMN IF NOT EXISTS category text;
+
+DROP POLICY IF EXISTS "auth read pageviews" ON public.page_views;
+CREATE POLICY "admins read pageviews" ON public.page_views
+  FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+
+-- 6. Contact submissions admin read
+DROP POLICY IF EXISTS "auth read contact" ON public.contact_submissions;
+CREATE POLICY "admins read contact" ON public.contact_submissions
+  FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+
+ALTER TABLE public.contact_submissions
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'New';
+CREATE POLICY "admins update contact" ON public.contact_submissions
+  FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+-- 7. Label analyses admin read (replace public read)
+DROP POLICY IF EXISTS "public read label" ON public.label_analyses;
+CREATE POLICY "admins read label" ON public.label_analyses
+  FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));

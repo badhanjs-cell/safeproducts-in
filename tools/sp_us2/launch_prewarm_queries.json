@@ -1,0 +1,52 @@
+{
+  "contract_version": "SP-US2-PREWARM/1.0",
+  "market_country_code": "IN",
+  "currency": "INR",
+  "queries": [
+    {
+      "case": "specific_ml",
+      "query": "NIVEA MEN Deep Comfort After Shave Lotion 100 ml",
+      "search_mode": "SPECIFIC_PRODUCT",
+      "requested_pack_key": "100:ml",
+      "category": "after shave lotion",
+      "target_exact_offers": 5,
+      "target_alternatives": 5
+    },
+    {
+      "case": "specific_count",
+      "query": "TATA 1mg Tejasya Ashwagandha 60 Capsules",
+      "search_mode": "SPECIFIC_PRODUCT",
+      "requested_pack_key": "60:count",
+      "category": "health supplement",
+      "target_exact_offers": 5,
+      "target_alternatives": 5
+    },
+    {
+      "case": "specific_gm",
+      "query": "Himalaya Neem Face Pack 75 gm",
+      "search_mode": "SPECIFIC_PRODUCT",
+      "requested_pack_key": "75:g",
+      "category": "face pack",
+      "target_exact_offers": 5,
+      "target_alternatives": 5
+    },
+    {
+      "case": "category_no_pack",
+      "query": "anti dandruff shampoo for men",
+      "search_mode": "CATEGORY",
+      "requested_pack_key": null,
+      "category": "shampoo",
+      "target_exact_offers": 0,
+      "target_alternatives": 10
+    },
+    {
+      "case": "category_explicit_pack",
+      "query": "baby lotion 200 ml",
+      "search_mode": "CATEGORY",
+      "requested_pack_key": "200:ml",
+      "category": "baby lotion",
+      "target_exact_offers": 0,
+      "target_alternatives": 10
+    }
+  ]
+}

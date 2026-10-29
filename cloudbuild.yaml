@@ -1,0 +1,64 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: Build
+    args:
+      - build
+      - --no-cache
+      - -t
+      - $_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/$_IMAGE_NAME:$COMMIT_SHA
+      - .
+      - -f
+      - Dockerfile
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push
+    args:
+      - push
+      - $_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/$_IMAGE_NAME:$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: VerifyTarget
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - describe
+      - $_SERVICE_NAME
+      - --platform=managed
+      - --region=$_DEPLOY_REGION
+      - --project=$PROJECT_ID
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - --platform=managed
+      - --region=$_DEPLOY_REGION
+      - --project=$PROJECT_ID
+      - --image=$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/$_IMAGE_NAME:$COMMIT_SHA
+      - --labels=managed-by=cloud-build,commit-sha=$COMMIT_SHA
+      - --quiet
+
+images:
+  - $_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/$_IMAGE_NAME:$COMMIT_SHA
+
+substitutions:
+  _SERVICE_NAME: safeproducts-web
+  _DEPLOY_REGION: asia-south1
+  _AR_HOSTNAME: asia-south1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _IMAGE_NAME: safeproducts-web
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+tags:
+  - safeproducts
+  - cloud-build
+  - cloud-run
+  - production

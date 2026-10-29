@@ -1,0 +1,53 @@
+name: SafeProducts Cloud Run Live Canary (non-scoring)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/routes/independent-review.tsx'
+      - 'supabase/migrations/*sp_safety_canary_shadow_diagnostic*'
+      - 'supabase/migrations/*sp_safety_external_reviewer_queue*'
+      - '.github/workflows/sp-safety-cloudrun-live-canary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-http-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: SafeProducts public pages are reachable without leaking protected reviewer data
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://safeproducts-777273687940.asia-south1.run.app'
+          for path in '/' '/check-my-label' '/independent-review'; do
+            echo "Checking SafeProducts public HTML for ${path}"
+            ok=0
+            for attempt in $(seq 1 18); do
+              status=$(curl -L -sS -o /tmp/sp-page.html -w '%{http_code}' --max-time 20 "$base$path") || status=000
+              expected='SafeProducts'
+              if [ "$path" = '/check-my-label' ]; then expected='Check My Label'; fi
+              if [ "$path" = '/independent-review' ]; then expected='Independent clinical'; fi
+              if [ "$status" = 200 ] && grep -qi "$expected" /tmp/sp-page.html; then
+                ok=1
+                echo "Verified page $path HTTP 200"
+                break
+              fi
+              echo "Page $path is not yet healthy (attempt $attempt; HTTP $status)"
+              sleep 10
+            done
+            if [ "$ok" != 1 ]; then
+              echo "::error::Cloud Run public page $path was unavailable; live HTTP acceptance FAILED."
+              exit 1
+            fi
+          done
+          echo 'HTTP_PAGE_SMOKE_PASS — this does not verify production source SHA, authentication,'
+          echo 'independent clinical certification, numerical score release or canary user sessions.'
+      - name: Report deployment acceptance scope
+        shell: bash
+        run: |
+          echo 'Cloud Run page-level transport acceptance only.'
+          echo 'No score was promoted, no simulated external clinical reviewer was added.'
+          echo 'Full live canary requires verified Cloud Run revision + independently approved release + signed-in reviewer end-to-end test.'

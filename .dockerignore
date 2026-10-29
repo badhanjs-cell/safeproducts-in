@@ -1,0 +1,28 @@
+# Source-control and local tooling
+.git
+.vscode
+.idea
+.DS_Store
+
+# Keep .github in the build context: SafeProducts certification tests read the
+# canonical workflow definitions during prebuild qualification.
+
+# Local/runtime dependencies and build output
+node_modules
+dist
+dist-ssr
+.output
+.nitro
+.vinxi
+.tanstack
+.wrangler
+coverage
+*.log
+
+# SafeProducts intentionally keeps the canonical publishable Supabase bindings
+# in its tracked .env. The build stage needs those VITE_* values, while the
+# final runtime image copies only .output and therefore does not contain .env.
+
+# Local-only files
+*.local
+.dev.vars

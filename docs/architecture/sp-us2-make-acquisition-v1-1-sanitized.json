@@ -1,0 +1,74 @@
+{
+  "scenario_id": 7613424,
+  "scenario_name": "SP_US2_MAKE_ACQUISITION_V1",
+  "contract_version": "SP-US2-MAKE-ACQUISITION/1.1",
+  "callback_contract_version": "SP-US2-MAKE-CALLBACK/1.1",
+  "expected_status_after_qualification": "inactive",
+  "market_country_code": "IN",
+  "currency": "INR",
+  "provider_budget": {
+    "specific": {
+      "shopping_anchor_max": 1,
+      "immersive_stores_max": 1,
+      "shopping_alternatives_max": 1,
+      "total_provider_calls_max": 3
+    },
+    "category": {
+      "shopping_category_max": 1,
+      "immersive_stores_max": 0,
+      "total_provider_calls_max": 1
+    }
+  },
+  "module_policy": {
+    "exact_shopping_module": 6,
+    "exact_cluster_feeder_module": 22,
+    "exact_cluster_feeder_limit": 1,
+    "exact_stores_module": 7,
+    "alternative_shopping_module": 10,
+    "category_shopping_module": 16,
+    "removed_provider_fanout_modules": [12, 23, 18, 24],
+    "disabled_provider_fanout_modules": [],
+    "specific_alternative_aggregator_feeder_module": 11,
+    "category_aggregator_feeder_module": 17,
+    "category_execution_path": [4, 16, 27, 17, 19, 20, 21],
+    "specific_callback_builder_modules": [14, 29, 28],
+    "category_callback_builder_modules": [20, 30]
+  },
+  "pack_policy": {
+    "explicit_request": "IMMUTABLE_REQUESTED_PACK_ONLY",
+    "no_pack_request": "BACKEND_RESOLVED_COMPARISON_PACK",
+    "market_standard_fallback_for_explicit_pack": false,
+    "mixed_pack_comparison": false
+  },
+  "direct_shopping_observations": {
+    "require_https_merchant_page": true,
+    "require_brand": true,
+    "require_positive_price": true,
+    "incomplete_observation_action": "SKIP_RETURN_FEWER",
+    "google_cluster_url_is_not_merchant_evidence": true
+  },
+  "callback_policy": {
+    "exact_offers_max": 5,
+    "specific_alternatives_max": 5,
+    "category_products_max": 10,
+    "distinct_merchants_for_exact": true,
+    "distinct_brands_for_alternatives": true,
+    "protected_backend_revalidation": true,
+    "candidate_identity_only": true,
+    "image_capture": "OPPORTUNISTIC_ALREADY_OBSERVED_ONLY"
+  },
+  "authority_boundary": {
+    "make_scope": "COMMERCE_AND_PRODUCT_DISCOVERY_ONLY",
+    "backend_scope": "IDENTITY_REVALIDATION_EVIDENCE_QUALIFICATION_SCORING_AND_HUMAN_REVIEW",
+    "can_make_create_scores": false,
+    "can_make_create_evidence": false,
+    "can_make_resolve_human_review": false,
+    "can_make_promote_identity": false
+  },
+  "cost_controls": {
+    "pagination_limit": 1,
+    "provider_retry_fanout": false,
+    "image_only_paid_search": false,
+    "routine_activation_during_qualification": false
+  }
+}

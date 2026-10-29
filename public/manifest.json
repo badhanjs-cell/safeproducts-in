@@ -1,0 +1,14 @@
+{
+  "name": "SafeProducts",
+  "short_name": "SafeProducts",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121920",
+  "theme_color": "#38BDF8",
+  "description": "India's Product Safety Guide",
+  "icons": [
+    { "src": "/safeproducts-app-192-v2.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/safeproducts-app-512-v2.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/safeproducts-app-maskable-512-v2.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "milestone": "M1_B_M1_BR_150_PRODUCT_BENCHMARK",
+  "version": "1.0.0",
+  "canonical_supabase_project_ref": "wmxbdirvlwuagouraobr",
+  "canonical_homepage_freeze_commit": "2a5e7a30f2a670d0d1b3337bf27203cf37dd1c79",
+  "benchmark": {
+    "total_products": 150,
+    "dev_products": 30,
+    "holdout_products": 120,
+    "categories": [
+      "cosmetics",
+      "personal_care",
+      "baby_products",
+      "supplements",
+      "nutraceuticals",
+      "special_dietary"
+    ],
+    "threshold_tuning_split": "DEV",
+    "holdout_threshold_mutation_allowed": false,
+    "gold_must_be_human_adjudicated": true
+  },
+  "acceptance": {
+    "provenance_coverage_min": 1.0,
+    "unsupported_ingredient_count_max": 0,
+    "precision_non_regression": true,
+    "recall_must_improve": true,
+    "false_qualification_increase_allowed": false,
+    "display_ack_required_before_benchmark_promotion": true
+  },
+  "engine_separation": {
+    "foreground": "M1-B",
+    "recovery": "M1-BR",
+    "recovery_is_asynchronous": true,
+    "recovery_is_ingredient_only": true
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "boundary_version": "SP-M1B-LAUNCH-EVIDENCE/1.0",
+  "evidence_order": [
+    "OFFICIAL",
+    "TRUSTED_STRUCTURED",
+    "M1BR_OCR_VLM",
+    "HUMAN_REVIEW"
+  ],
+  "official_complete_stops_escalation": true,
+  "trusted_requires_hard_gates": true,
+  "ocr_and_vlm_scope": "M1BR_RECOVERY_ONLY",
+  "uncertain_or_conflicting_terminal_evidence": "HUMAN_REVIEW",
+  "human_reviewer_role": "VALIDATE_OR_SUPPLY_PROVENANCE_BOUND_INGREDIENT_EVIDENCE",
+  "score_authority": "BACKEND_SP_M1B_SCORE_QUALIFIED_PRODUCT_V1",
+  "commerce_acquisition_can_score": false,
+  "commerce_acquisition_can_create_ingredient_evidence": false,
+  "human_review_accepts_manual_numeric_score": false,
+  "image_presence_is_eligibility_gate": false,
+  "image_only_paid_search": false,
+  "images_are_safety_evidence": false,
+  "make_scope": "COMMERCE_AND_PRODUCT_DISCOVERY_ONLY"
+}

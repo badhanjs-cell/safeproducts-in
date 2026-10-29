@@ -1,0 +1,96 @@
+{
+  "version": "SP-US2-MAKE-ACQUISITION/1.0",
+  "request_example": {
+    "contract_version": "SP-US2-MAKE-ACQUISITION/1.0",
+    "request_id": "11111111-1111-4111-8111-111111111111",
+    "query": "nivea men deep comfort after shave lotion 100 ml",
+    "search_mode": "SPECIFIC_PRODUCT",
+    "anchor_product": {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "brand_name": "NIVEA MEN",
+      "product_name": "Deep Comfort After Shave Lotion",
+      "variant_name": null,
+      "pack_size_text": "100 ml",
+      "pack_normalized_key": "100:ml",
+      "category": "after shave lotion",
+      "market_country_code": "IN"
+    },
+    "requested_pack_key": "100:ml",
+    "category": "after shave lotion",
+    "target_exact_offers": 5,
+    "target_alternatives": 5,
+    "market_country_code": "IN",
+    "currency": "INR",
+    "callback_url": "https://wmxbdirvlwuagouraobr.supabase.co/functions/v1/sp-us2-make-callback-v1"
+  },
+  "callback_example": {
+    "contract_version": "SP-US2-MAKE-CALLBACK/1.0",
+    "request_id": "11111111-1111-4111-8111-111111111111",
+    "market_country_code": "IN",
+    "currency": "INR",
+    "requested_pack_key": "100:ml",
+    "products": [
+      {
+        "ref": "ALT_1",
+        "brand_name": "Example Alternative Brand",
+        "product_name": "After Shave Lotion",
+        "variant_name": null,
+        "category": "after shave lotion",
+        "pack_size_text": "100 ml",
+        "pack_normalized_key": "100:ml",
+        "source_url": "https://merchant.example/products/example-after-shave-lotion-100ml",
+        "source_name": "merchant.example",
+        "identity_confidence": 96,
+        "market_country_code": "IN"
+      }
+    ],
+    "offers": [
+      {
+        "product_ref": "ANCHOR",
+        "merchant_name": "Example Merchant One",
+        "platform_name": "Example Merchant One",
+        "source_url": "https://shop-one.example/products/nivea-men-deep-comfort-after-shave-lotion-100ml",
+        "observed_source_urls": [
+          "https://shop-one.example/products/nivea-men-deep-comfort-after-shave-lotion-100ml"
+        ],
+        "price": 349,
+        "currency": "INR",
+        "market_country_code": "IN",
+        "image_url": "https://shop-one.example/images/nivea-men-deep-comfort-after-shave-lotion-100ml.jpg",
+        "pack_size_text": "100 ml",
+        "pack_normalized_key": "100:ml",
+        "exact_product_match": true,
+        "variant_match": true,
+        "exact_pack_match": true,
+        "confidence": 98
+      },
+      {
+        "product_ref": "ALT_1",
+        "merchant_name": "Example Merchant Two",
+        "platform_name": "Example Merchant Two",
+        "source_url": "https://merchant.example/products/example-after-shave-lotion-100ml",
+        "observed_source_urls": [
+          "https://merchant.example/products/example-after-shave-lotion-100ml"
+        ],
+        "price": 299,
+        "currency": "INR",
+        "market_country_code": "IN",
+        "image_url": "https://merchant.example/images/example-after-shave-lotion-100ml.jpg",
+        "pack_size_text": "100 ml",
+        "pack_normalized_key": "100:ml",
+        "exact_product_match": true,
+        "variant_match": true,
+        "exact_pack_match": true,
+        "confidence": 96
+      }
+    ]
+  },
+  "limits": {
+    "max_products": 10,
+    "max_offers": 10,
+    "specific_exact_offer_target": 5,
+    "specific_alternative_target": 5,
+    "category_minimum_useful": 6,
+    "category_target": 10
+  }
+}

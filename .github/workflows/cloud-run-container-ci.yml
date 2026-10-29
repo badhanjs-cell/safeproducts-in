@@ -1,0 +1,60 @@
+name: Cloud Run Container CI
+
+on:
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/cloud-run-container-ci.yml"
+      - "cloudbuild.yaml"
+      - "tests/cloud-run/main-cloudbuild-contract.test.mjs"
+      - ".env"
+      - "package.json"
+      - "bun.lockb"
+      - "bunfig.toml"
+      - "vite.config.ts"
+
+permissions:
+  contents: read
+
+jobs:
+  cloud-run-container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Qualify Cloud Build production contract
+        run: node --test tests/cloud-run/main-cloudbuild-contract.test.mjs
+
+      - name: Build Cloud Run image
+        run: docker build --tag safeproducts-cloudrun:ci .
+
+      - name: Verify runtime image contains no env file
+        run: |
+          if docker run --rm --entrypoint sh safeproducts-cloudrun:ci -c 'test -e /app/.env'; then
+            echo "Runtime image unexpectedly contains /app/.env." >&2
+            exit 1
+          fi
+
+      - name: Smoke-test container
+        run: |
+          docker run -d --rm \
+            --name safeproducts-cloudrun-ci \
+            -p 8080:8080 \
+            --env-file .env \
+            safeproducts-cloudrun:ci
+
+          trap 'docker logs safeproducts-cloudrun-ci || true; docker stop safeproducts-cloudrun-ci || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:8080/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Cloud Run container did not become ready on port 8080." >&2
+          exit 1

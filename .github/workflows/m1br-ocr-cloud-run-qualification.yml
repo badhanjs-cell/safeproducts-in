@@ -1,0 +1,81 @@
+name: SafeProducts M1-BR OCR Cloud Run Qualification
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - services/m1br-ocr/**
+      - cloudbuild.m1br-ocr.yaml
+      - tests/cloud-run/test_m1br_ocr_cloud_run.py
+      - supabase/functions/sp-m1br-recovery-worker-v1/index.ts
+      - .github/workflows/m1br-ocr-cloud-run-qualification.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lightweight OCR contract dependencies
+        run: pip install fastapi==0.116.1 httpx==0.28.1 Pillow==11.3.0 pytest
+
+      - name: Compile OCR service
+        run: python -m py_compile services/m1br-ocr/app.py
+
+      - name: Existing OCR behavior tests
+        run: (cd services/m1br-ocr && pytest test_app.py -q)
+
+      - name: Cloud Run OCR contracts
+        run: python -m unittest -v tests/cloud-run/test_m1br_ocr_cloud_run.py
+
+      - name: Existing SafeProducts OCR deployment contract
+        run: node --test tests/spM1BOcrDeploymentContract.test.mjs
+
+      - name: Build production OCR image
+        run: docker build --pull -t safeproducts-m1br-ocr:qualification -f services/m1br-ocr/Dockerfile services/m1br-ocr
+
+      - name: Start production OCR container
+        run: |
+          docker run --rm -d \
+            --name safeproducts-m1br-ocr \
+            -e PORT=8080 \
+            -e M1BR_OCR_TOKEN=qualification-token \
+            -p 8080:8080 \
+            safeproducts-m1br-ocr:qualification
+
+      - name: Verify public health
+        run: |
+          for attempt in {1..60}; do
+            if body="$(curl --fail --silent --show-error http://127.0.0.1:8080/health 2>/dev/null)"; then
+              python -c 'import json,sys; d=json.loads(sys.argv[1]); assert d=={"ok":True,"engine":"paddleocr"}' "$body"
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs safeproducts-m1br-ocr
+          exit 1
+
+      - name: Verify OCR endpoint remains token protected
+        run: |
+          status="$(curl --silent --show-error -o /tmp/ocr.json -w '%{http_code}' \
+            -X POST http://127.0.0.1:8080/ocr \
+            -H 'content-type: application/json' \
+            -d '{"content_type":"image/png","bytes_b64":"aQ=="}')"
+          test "$status" = "401"
+
+      - name: Qualification marker
+        run: echo SAFEPRODUCTS_M1BR_OCR_CLOUD_RUN_PRODUCTION_CANDIDATE_GREEN
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs safeproducts-m1br-ocr || true

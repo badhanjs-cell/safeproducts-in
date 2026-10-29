@@ -1,0 +1,57 @@
+{
+  "milestone": "M1-A_STANDALONE_INGREDIENT_EXTRACTION_BENCHMARK_FOUNDATION",
+  "version": "1.0.0",
+  "created_date": "2026-09-17",
+  "canonical_homepage_freeze": {
+    "branch": "freeze/homepage-final-compact-2026-09-17",
+    "commit": "2a5e7a30f2a670d0d1b3337bf27203cf37dd1c79",
+    "mutation_allowed": false
+  },
+  "canonical_supabase": {
+    "name": "SafeProducts_ValuLenz",
+    "project_ref": "wmxbdirvlwuagouraobr",
+    "benchmark_database_mutation_allowed": false
+  },
+  "benchmark": {
+    "total_products": 150,
+    "categories": {
+      "cosmetics": 25,
+      "personal_care": 25,
+      "baby_products": 25,
+      "supplements": 25,
+      "nutraceuticals": 25,
+      "special_dietary": 25
+    },
+    "split": {
+      "DEV": 30,
+      "HOLDOUT": 120,
+      "per_category_dev": 5,
+      "per_category_holdout": 20
+    },
+    "outcomes": [
+      "QUALIFIED",
+      "INSUFFICIENT_EVIDENCE",
+      "CONFLICT_REQUIRES_REVIEW"
+    ],
+    "source_priority": [
+      "MANUFACTURER_OFFICIAL",
+      "BRAND_OFFICIAL",
+      "OFFICIAL_SHOPIFY_OR_STRUCTURED_SITE",
+      "TRUSTED_PHARMACY_OR_STRUCTURED_SOURCE",
+      "OPEN_PRODUCT_DATABASE",
+      "MARKETPLACE_OR_MERCHANT",
+      "IMAGE_OCR",
+      "VLM_FALLBACK",
+      "USER_SUPPLIED_LABEL"
+    ],
+    "acceptance_gates": {
+      "holdout_provenance_coverage_min": 1.0,
+      "holdout_unsupported_ingredient_count_max": 0,
+      "candidate_precision_not_below_baseline": true,
+      "candidate_recall_must_exceed_baseline": true,
+      "candidate_abstention_accuracy_not_below_baseline": true,
+      "candidate_conflict_accuracy_not_below_baseline": true,
+      "candidate_downstream_qualification_success_not_below_baseline": true
+    }
+  }
+}

@@ -1,0 +1,70 @@
+name: SafeProducts Label Private Cache CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/routes/check-my-label.tsx'
+      - 'supabase/functions/sp-m1b-label-analyze-v1/**'
+      - 'supabase/functions/sp-m1b-label-analyze-v2/**'
+      - 'supabase/functions/sp-label-private-images-v1/**'
+      - 'supabase/functions/sp-label-front-cache-v2/**'
+      - 'supabase/migrations/*sp_label_private_image_cache*'
+      - 'supabase/migrations/*sp_web_label_front_pack_screening*'
+      - 'supabase/migrations/*sp_label_exact_pack_front_required*'
+      - 'tests/spLabelPrivateCacheContract.test.mjs'
+      - 'tests/spLabelExactPairTranscriptionContract.test.mjs'
+      - 'supabase/migrations/*sp_label_exact_pair_transcription*'
+      - 'tests/spSupplementRegulatoryReviewContract.test.mjs'
+      - 'tests/spLabelClinicalScreenContract.test.mjs'
+      - 'tests/spClinicalScreenRuntime.test.ts'
+      - 'tests/spMultiSourceSafetyEvidenceRuntime.test.ts'
+      - 'tests/spIndependentValidationGateRuntime.test.ts'
+      - 'tests/spIndependentValidationGovernanceContract.test.mjs'
+      - 'tests/spSafetyLiveCanaryGovernanceContract.test.mjs'
+      - 'src/routes/independent-review.tsx'
+      - 'supabase/functions/sp-us2-ingredient-acquire-v1/**'
+      - 'tests/spMakeIngredientAcquisitionContract.test.mjs'
+      - 'docs/sp-us2-make-ingredient-acquisition-v1.md'
+      - 'supabase/migrations/*sp_safety_canary_shadow_diagnostic*'
+      - 'supabase/migrations/*sp_safety_external_reviewer_queue*'
+      - 'src/lib/safetyValidationBenchmark.ts'
+      - 'supabase/migrations/*sp_independent_validation_foundation*'
+      - 'supabase/migrations/*sp_validation_freeze_and_score_denial*'
+      - 'supabase/migrations/*sp_validation_rpc_execute_grants_hotfix*'
+      - 'supabase/migrations/*sp_validation_calibration_promotion_rollback*'
+      - 'supabase/migrations/*sp_validation_readiness_transparency*'
+      - 'docs/safety-independent-validation-v1.md'
+      - 'tests/spMultiSourceEvidenceContract.test.mjs'
+      - 'src/components/MultiSourceEvidenceReview.tsx'
+      - 'supabase/migrations/*sp_multi_source_evidence_pilot*'
+      - 'src/components/ClinicalSafetyScreen.tsx'
+      - 'supabase/migrations/*sp_clinical_screen_isolated*'
+      - 'src/components/SupplementRegulatoryReview.tsx'
+      - 'supabase/migrations/*sp_supplement_review_provenance*'
+      - 'supabase/migrations/*sp_fssai_supplement_schedule_adapter*'
+      - '.github/workflows/label-private-cache-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  label-private-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Label image/privacy contracts
+        run: node --test tests/spLabelPrivateCacheContract.test.mjs tests/spSupplementRegulatoryReviewContract.test.mjs tests/spLabelClinicalScreenContract.test.mjs tests/spLabelExactPairTranscriptionContract.test.mjs tests/spMultiSourceEvidenceContract.test.mjs tests/spIndependentValidationGovernanceContract.test.mjs tests/spSafetyLiveCanaryGovernanceContract.test.mjs tests/spMakeIngredientAcquisitionContract.test.mjs
+      - name: Clinical screening executable regression
+        run: bun test tests/spClinicalScreenRuntime.test.ts tests/spMultiSourceSafetyEvidenceRuntime.test.ts tests/spIndependentValidationGateRuntime.test.ts
+      - name: TypeScript
+        run: bun run typecheck
+      - name: Existing SafeProducts backend contracts
+        run: bun run check:backend
+      - name: Production build
+        run: bun run build

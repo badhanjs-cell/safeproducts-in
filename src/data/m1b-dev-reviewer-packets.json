@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "split": "DEV",
+  "packet_count": 30,
+  "ready_count": 26,
+  "blocked_count": 4,
+  "gold_status": "UNASSIGNED",
+  "promotion_allowed": false,
+  "human_adjudication_required": true,
+  "storage": "DIRECT_CHUNKED_JSON",
+  "ready_files": [
+    "m1b-dev-review-ready-1.json",
+    "m1b-dev-review-ready-2.json",
+    "m1b-dev-review-ready-3.json",
+    "m1b-dev-review-ready-4.json",
+    "m1b-dev-review-ready-5.json",
+    "m1b-dev-review-ready-6.json"
+  ],
+  "blocked_file": "m1b-dev-review-blocked.json"
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "split": "DEV",
+  "approval_scope": "ALL_REVIEWABLE_PACKETS_IN_FROZEN_DEV_SNAPSHOT",
+  "approved_count": 26,
+  "blocked_count": 4,
+  "reviewer_id_sha256": "efb57ae1e3cb727ddeee9958979a4e8cf95ffb8bf9ac9d0492a37eaee0231aed",
+  "human_review_exported_at": "2026-09-20T15:37:06.172Z",
+  "source_evidence_revision": "6bd74d51902a2040bc6db97266ce6a12798efead",
+  "final_approval_confirmed": true,
+  "gold_status": "UNASSIGNED",
+  "promotion_allowed": false,
+  "human_adjudication_required": true,
+  "stage_status": "STAGING_AUTHORIZED_NOT_PROMOTED"
+}

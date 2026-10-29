@@ -1,0 +1,72 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const read=path=>readFileSync(path,"utf8");
+const review=read("supabase/functions/sp-m1b-label-analyze-v2/supplement-regulatory-review-v1.ts");
+const edge=read("supabase/functions/sp-m1b-label-analyze-v2/index.ts");
+const frontend=read("src/components/SupplementRegulatoryReview.tsx");
+const main=read("src/lib/labels.functions.ts");
+const migration=read("supabase/migrations/20261014200000_sp_supplement_review_provenance_v1.sql");
+const lookup=read("supabase/migrations/20261014201500_sp_fssai_supplement_schedule_adapter_v1.sql");
+const storage=read("supabase/functions/sp-label-front-cache-v2/index.ts");
+test("FSSAI advisory and operational schedule are authoritative and distinguish food categories",()=>{
+ assert.match(review,/FSSAI_ASHWA_ROOT_2026/);
+ assert.match(review,/FSSAI_NUTRA_2022/);
+ assert.match(review,/FSSAI_LABEL_2020/);
+ assert.match(review,/2026\/04\//);
+ assert.match(review,/2022\/04\//);
+ assert.match(review,/UNCONFIRMED_FOOD_SUPPLEMENT/);
+ assert.match(review,/food-versus-AYUSH/);
+ assert.match(review,/not a product approval/);
+});
+test("Ashwagandha schedule matches read-only FSSAI records, requires correct extract form and service-only access",()=>{
+ assert.match(lookup,/FROM public.regulatory_standards/);
+ assert.match(lookup,/s.standard_id='FSSAI-NUTRA-2022-SCH-II'/);
+ assert.match(lookup,/s.agency='FSSAI'/);
+ assert.match(lookup,/s.limits->>'form'='extract'/);
+ assert.match(lookup,/p_scope='SUPPLEMENT_ORAL'/);
+ assert.match(lookup,/GRANT EXECUTE ON FUNCTION public.sp_web_fssai_supplement_schedule_v1\(text,text\) TO service_role/);
+ assert.doesNotMatch(lookup,/INSERT INTO public.regulatory_standards|UPDATE public.regulatory_standards|DELETE FROM public.regulatory_standards/);
+ assert.match(edge,/sp_web_fssai_supplement_schedule_v1/);
+ assert.match(edge,/scheduleResult.ok\?scheduleResult.data:null/);
+ assert.match(review,/SCHEDULE_REFERENCE_ONLY/);
+});
+test("NIN and ICMR guide nutrient RDA, not licensing or botanical approval",()=>{
+ assert.match(review,/ICMR_RDA_2020/);
+ assert.match(review,/NIN_DIET_2024/);
+ assert.match(review,/not approve individual brands/);
+ assert.match(review,/separate RDA for this Ashwagandha extract/);
+ assert.match(review,/FSSAI licence/);
+});
+test("the pictured panel is not mistaken for the complete pack",()=>{
+ assert.match(edge,/supplement_label/);
+ assert.match(edge,/Return empty string for any field not legible/);
+ assert.match(edge,/absence from this photo is not absence from the whole package/);
+ assert.match(review,/NOT_VISIBLE/);
+ assert.match(frontend,/The complete package and licensing category/);
+ assert.match(review,/strength per capsule/);
+ assert.match(review,/claims/);
+ assert.match(review,/batch_and_expiry/);
+});
+test("supplement review is bound to signed-in scan owner with RLS and official provenance",()=>{
+ assert.match(migration,/FORCE ROW LEVEL SECURITY/);
+ assert.match(migration,/REVOKE ALL ON public.sp_web_supplement_regulatory_review_v1 FROM PUBLIC,anon,authenticated/);
+ assert.match(migration,/s.run_id=p_run_id AND s.owner_id=p_owner_id/);
+ assert.match(migration,/GRANT EXECUTE ON FUNCTION public.sp_web_label_record_supplement_review_v1\(uuid,uuid,jsonb\) TO service_role/);
+ assert.match(edge,/sp_web_label_record_supplement_review_v1/);
+ assert.match(edge,/p_owner_id:userInfo.id/);
+ assert.match(edge,/supplement_review:supplementReview/);
+ assert.match(main,/SP_SUPPLEMENT_REVIEW_V1/);
+ assert.match(frontend,/FSSAI supplement, label and usage review/);
+ assert.match(frontend,/View official reference/);
+});
+test("browser front-photo endpoint handles OPTIONS and protects origins and login",()=>{
+ assert.match(storage,/request.method === "OPTIONS"/);
+ assert.match(storage,/Access-Control-Allow-Origin/);
+ assert.match(storage,/Access-Control-Allow-Headers/);
+ assert.match(storage,/ALLOWED_ORIGINS/);
+ assert.doesNotMatch(storage,/let currentOrigin/);
+ assert.match(storage,/\/auth\/v1\/user/);
+ assert.match(storage,/owner_id=eq.\$\{ownerId\}/);
+ assert.match(storage,/body.role !== "front"/);
+});

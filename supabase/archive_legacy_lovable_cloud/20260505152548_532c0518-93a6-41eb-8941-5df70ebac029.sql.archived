@@ -1,0 +1,128 @@
+
+-- Regulatory standards (reference)
+CREATE TABLE public.regulatory_standards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ingredient_name text NOT NULL,
+  category text,
+  status text NOT NULL CHECK (status IN ('permitted','restricted','prohibited')),
+  max_limit text,
+  notes text,
+  source text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ON public.regulatory_standards (lower(ingredient_name));
+
+CREATE TABLE public.compliance_logic (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  category text NOT NULL,
+  rule text NOT NULL,
+  weight numeric DEFAULT 1,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Products
+CREATE TABLE public.product_marketplace (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  brand text,
+  category text NOT NULL,
+  subcategory text,
+  platform text,
+  price numeric,
+  image_url text,
+  product_url text,
+  ingredients jsonb DEFAULT '[]'::jsonb,
+  safety_score numeric NOT NULL DEFAULT 0,
+  warnings jsonb DEFAULT '[]'::jsonb,
+  profile_safety jsonb DEFAULT '{}'::jsonb,
+  search_terms text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX ON public.product_marketplace (category);
+CREATE INDEX ON public.product_marketplace USING gin (to_tsvector('english', coalesce(name,'') || ' ' || coalesce(brand,'') || ' ' || coalesce(search_terms,'')));
+
+-- Contact submissions
+CREATE TABLE public.contact_submissions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name text NOT NULL,
+  email text NOT NULL,
+  phone text,
+  user_type text NOT NULL,
+  purpose text NOT NULL,
+  subject text NOT NULL,
+  message text NOT NULL,
+  attachment_url text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Label analyses
+CREATE TABLE public.label_analyses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  uploaded_image_url text,
+  detected_ingredients jsonb DEFAULT '[]'::jsonb,
+  safety_score numeric,
+  profile_used text,
+  warnings jsonb DEFAULT '[]'::jsonb,
+  ingredient_breakdown jsonb DEFAULT '[]'::jsonb,
+  summary text,
+  session_id text,
+  analysed_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Guidelines (admin managed)
+CREATE TABLE public.guidelines (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile text NOT NULL CHECK (profile IN ('children','pregnant','seniors')),
+  title text NOT NULL,
+  body text NOT NULL,
+  display_order int DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.site_announcements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  message text NOT NULL,
+  active boolean DEFAULT true,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Page views analytics
+CREATE TABLE public.page_views (
+  id bigint generated always as identity primary key,
+  page text,
+  search_term text,
+  category_clicked text,
+  profile_used text DEFAULT 'ALL',
+  session_id text,
+  device_type text,
+  visited_at timestamptz DEFAULT now()
+);
+CREATE INDEX idx_pageviews_date ON public.page_views (visited_at DESC);
+CREATE INDEX idx_pageviews_search ON public.page_views (search_term);
+
+-- Enable RLS on all
+ALTER TABLE public.regulatory_standards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.compliance_logic ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.product_marketplace ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.label_analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.guidelines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.site_announcements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+
+-- Public read for reference data
+CREATE POLICY "public read regulatory" ON public.regulatory_standards FOR SELECT USING (true);
+CREATE POLICY "public read compliance" ON public.compliance_logic FOR SELECT USING (true);
+CREATE POLICY "public read products" ON public.product_marketplace FOR SELECT USING (true);
+CREATE POLICY "public read guidelines" ON public.guidelines FOR SELECT USING (true);
+CREATE POLICY "public read announcements" ON public.site_announcements FOR SELECT USING (active = true);
+
+-- Public insert for contact, label, page_views; public read of own label analyses by session
+CREATE POLICY "public insert contact" ON public.contact_submissions FOR INSERT WITH CHECK (true);
+CREATE POLICY "public insert label" ON public.label_analyses FOR INSERT WITH CHECK (true);
+CREATE POLICY "public read label" ON public.label_analyses FOR SELECT USING (true);
+CREATE POLICY "public insert pageviews" ON public.page_views FOR INSERT WITH CHECK (true);
+
+-- Authenticated read for analytics & contact submissions
+CREATE POLICY "auth read pageviews" ON public.page_views FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "auth read contact" ON public.contact_submissions FOR SELECT USING (auth.role() = 'authenticated');

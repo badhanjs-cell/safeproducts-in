@@ -1,0 +1,149 @@
+name: M1-B M1-BR CI
+
+on:
+  push:
+    branches:
+      - feat/m1b-m1br-architecture-spec-2026-09-19
+      - feat/make-commerce-discovery-qualification-2026-09-23
+  pull_request:
+    paths:
+      - 'docs/superpowers/specs/2026-09-19-m1b-m1br-final-approved.md'
+      - 'docs/superpowers/certifications/**'
+      - 'docs/integrations/make/**'
+      - 'tools/m1a/**'
+      - 'tools/m1b/**'
+      - 'tools/sp_us2/**'
+      - 'tests/spM1B*.test.mjs'
+      - 'tests/spUnifiedSearchV2*.test.mjs'
+      - 'tests/spUnifiedSearchV2Make*.test.mjs'
+      - 'scripts/assert-m1b-contract.mjs'
+      - 'scripts/sp-us2-prewarm.mjs'
+      - 'services/m1br-ocr/**'
+      - 'supabase/migrations/**'
+      - 'supabase/functions/sp-m1b-*/**'
+      - 'supabase/functions/sp-m1br-*/**'
+      - 'supabase/functions/sp-us2-*/**'
+      - 'src/data/m1b-dev-review*.json'
+      - 'src/lib/m1bHumanReview.ts'
+      - 'src/lib/productSearch.functions.ts'
+      - 'src/lib/searchContract.ts'
+      - 'src/lib/labels.functions.ts'
+      - 'src/components/SearchResults.tsx'
+      - 'src/routes/check-my-label.tsx'
+      - 'src/routes/admin.human-review.tsx'
+      - 'src/routes/admin.ingredient-recovery.tsx'
+      - 'src/components/admin/AdminShell.tsx'
+      - 'package.json'
+      - '.github/workflows/m1b-m1br-ci.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Install OCR test dependencies
+        run: python -m pip install --quiet fastapi httpx pillow pytest
+      - name: M1-B contract tests
+        shell: bash
+        run: |
+          node --test tests/spM1B*.test.mjs
+          node --test tests/spUnifiedSearchV2*.test.mjs
+          node scripts/sp-us2-prewarm.mjs --dry-run
+          python tools/m1a/test_benchmark.py
+          (cd tools/m1b && pytest test_runner.py test_report.py -q)
+          (cd tools/m1b && pytest test_dev_recovery_batch.py -q)
+          (cd tools/m1b && pytest test_dev_recovery_batch2.py -q)
+          (cd tools/m1b && pytest test_dev_recovery_batch3.py -q)
+          (cd tools/m1b && pytest test_dev_reviewer_export.py -q)
+          (cd tools/m1b && pytest test_dev_human_adjudication.py -q)
+          (cd tools/m1b && pytest test_gold_staging.py -q)
+          (cd tools/m1b && pytest test_generate_gold_staging_payload.py -q)
+          (cd tools/m1b && pytest test_gold_benchmark_execution.py -q)
+          (cd services/m1br-ocr && pytest test_app.py -q)
+      - name: Generate DEV reviewer packet artifact
+        shell: bash
+        run: |
+          python tools/m1b/dev_reviewer_export.py \
+            --candidate-pool tools/m1b/dev_candidate_pool.json \
+            --json-output dev_reviewer_packets.json \
+            --markdown-output dev_reviewer_packets.md
+          python tools/m1b/dev_human_adjudication.py \
+            --candidate-pool tools/m1b/dev_candidate_pool.json \
+            --template-output dev_human_adjudication_template.json
+      - name: Upload DEV reviewer packet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1b-dev-human-review-packets
+          path: |
+            dev_reviewer_packets.json
+            dev_reviewer_packets.md
+            dev_human_adjudication_template.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Generate controlled DEV gold staging payload
+        shell: bash
+        run: |
+          python tools/m1b/generate_gold_staging_payload.py \
+            --output dev_gold_staging_payload.json
+      - name: Upload controlled DEV gold staging payload
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1b-dev-gold-staging-payload
+          path: dev_gold_staging_payload.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Existing backend guards
+        run: bun run check:backend
+      - name: Build and generate file routes
+        run: bun run build
+      - name: Typecheck
+        run: bun run typecheck
+      - name: Frontend secret and rollout guard
+        id: security
+        shell: bash
+        run: |
+          set +e
+          frontend_files=(
+            src/components/LabelPendingResult.tsx
+            src/components/LabelQualifiedResult.tsx
+            src/components/SearchResults.tsx
+            src/components/admin/AdminShell.tsx
+            src/data/m1b-dev-review*.json
+            src/lib/labels.functions.ts
+            src/lib/m1bHumanReview.ts
+            src/lib/productSearch.functions.ts
+            src/lib/searchContract.ts
+            src/routes/admin.human-review.tsx
+            src/routes/admin.ingredient-recovery.tsx
+            src/routes/check-my-label.tsx
+          )
+          grep -En 'SUPABASE_SERVICE_ROLE_KEY|OPENAI_API_KEY|sb_secret_|service_role' "${frontend_files[@]}" > security-output.txt
+          code=$?
+          if [ "$code" -eq 0 ]; then
+            cat security-output.txt
+            echo 'Forbidden server-side secret marker found in M1-B frontend integration.' >&2
+            exit 1
+          fi
+          if [ "$code" -gt 1 ]; then
+            echo "Security scan failed with grep exit $code" >&2
+            exit "$code"
+          fi
+          grep -F 'process.env.SP_M1B_SEARCH_ENABLED === "true"' src/lib/productSearch.functions.ts >/dev/null
+          grep -F 'process.env.SP_M1B_LABEL_ENABLED === "true"' src/lib/labels.functions.ts >/dev/null
+      - name: Upload frontend security diagnostics
+        if: failure() && steps.security.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1b-frontend-security-diagnostics
+          path: security-output.txt
+          if-no-files-found: error
+          retention-days: 1
+      - name: Scoped M1-B semantic lint
+        run: bun run lint:m1b

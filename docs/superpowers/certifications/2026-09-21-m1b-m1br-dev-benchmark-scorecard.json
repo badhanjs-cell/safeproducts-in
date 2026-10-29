@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "milestone": "M1-B_M1-BR_DEV_BENCHMARK_EXECUTION",
+  "execution_batch_id": "a903f302-e140-453c-85f3-7f996ee3090e",
+  "split": "DEV",
+  "status": "COMPLETED",
+  "decision": "FAIL_DEV_USEFULNESS_GATE",
+  "production_rollout_authorized": false,
+  "holdout_certification_required": true,
+  "product_count": 26,
+  "blocked_gold_candidates_excluded": 4,
+  "m1b": {
+    "attempted": 26,
+    "qualified": 0,
+    "success_rate": 0.0
+  },
+  "m1br": {
+    "invoked": 26,
+    "qualified": 1,
+    "recovery_rate": 0.0384615385
+  },
+  "combined": {
+    "qualified": 1,
+    "qualification_rate": 0.0384615385,
+    "absolute_lift": 0.0384615385
+  },
+  "terminal_outcomes": {
+    "qualified": 1,
+    "insufficient_evidence": 13,
+    "conflict_requires_review": 12,
+    "human_review_handoff_required": 25
+  },
+  "dev_usefulness_gate": {
+    "criterion": "recover_at_least_20_percent_of_m1b_failures_or_add_at_least_5_percentage_points_absolute_combined_qualification",
+    "recovery_rate_threshold": 0.20,
+    "absolute_lift_threshold": 0.05,
+    "passed": false
+  },
+  "gold_ingredient_entry_count": 630,
+  "sole_qualified_case": {
+    "benchmark_slot_id": "SUPPLEMENTS-DEV-002",
+    "predicted_ingredients": ["Borage oil", "P5P", "Magnesium oxide"],
+    "prediction_count": 3,
+    "gold_declaration_entry_count": 12,
+    "source_ref": "https://www.akumentishealthcare.com/products/pms-fine/",
+    "manual_support_check": "ALL_THREE_PREDICTIONS_SUPPORTED_AS_GOLD_ACTIVE_EQUIVALENTS",
+    "full_declaration_recovered": false
+  },
+  "fidelity_measurement": {
+    "machine_certified_ingredient_precision": null,
+    "machine_certified_ingredient_recall": null,
+    "machine_certified_ingredient_f1": null,
+    "reason_unavailable": "BENCHMARK_GOLD_PERSISTENCE_STORES_DECLARATION_TEXT_AND_COUNT_BUT_NOT_CANONICAL_GOLD_INGREDIENT_ARRAY; CURRENT_SCORER_EXACT_NORMALIZATION_DOES_NOT_CANONICALIZE_DOSAGE_TEXT_OR_GENERIC_SYNONYMS",
+    "manual_observed_unsupported_ingredient_count_in_sole_qualified_case": 0,
+    "warning": "Do not substitute manual semantic support for machine-certified precision/recall. Add canonical gold ingredient arrays before HOLDOUT."
+  },
+  "performance": {
+    "p50_latency_ms": 53547,
+    "p95_latency_ms": 120112.25,
+    "search_calls": 65,
+    "ocr_calls": 1,
+    "vlm_calls": 1,
+    "recorded_cost_usd": 0,
+    "cost_telemetry_valid": false,
+    "cost_telemetry_issue": "Paid provider calls occurred but engine attempt metrics recorded cost_usd=0; actual cost per product is not yet certifiable."
+  },
+  "by_category": {
+    "baby_products": {"product_count": 4, "m1b_qualified": 0, "m1br_qualified": 0, "combined_qualified": 0, "conflicts": 3, "insufficient": 1},
+    "cosmetics": {"product_count": 5, "m1b_qualified": 0, "m1br_qualified": 0, "combined_qualified": 0, "conflicts": 3, "insufficient": 2},
+    "nutraceuticals": {"product_count": 4, "m1b_qualified": 0, "m1br_qualified": 0, "combined_qualified": 0, "conflicts": 1, "insufficient": 3},
+    "personal_care": {"product_count": 4, "m1b_qualified": 0, "m1br_qualified": 0, "combined_qualified": 0, "conflicts": 1, "insufficient": 3},
+    "special_dietary": {"product_count": 4, "m1b_qualified": 0, "m1br_qualified": 0, "combined_qualified": 0, "conflicts": 2, "insufficient": 2},
+    "supplements": {"product_count": 5, "m1b_qualified": 0, "m1br_qualified": 1, "combined_qualified": 1, "conflicts": 2, "insufficient": 2}
+  },
+  "external_dependency_event": {
+    "occurred": true,
+    "reason": "M1BR_PROVIDER_CREDIT_EXHAUSTED",
+    "fail_closed_pause_installed": true,
+    "benchmark_completed_after_credits_restored": true
+  },
+  "non_interference": {
+    "catalog_products": 4,
+    "product_ingredients": 50,
+    "ingredient_evidence": 4,
+    "safety_assessments": 4,
+    "catalog_review_queue": 66,
+    "benchmark_runs": 26,
+    "non_benchmark_runs_since_batch": 0,
+    "live_catalog_or_scoring_mutation_detected": false
+  },
+  "required_before_holdout": [
+    "PERSIST_CANONICAL_GOLD_INGREDIENT_ARRAYS",
+    "FIX_COST_TELEMETRY",
+    "IMPROVE_M1B_PATH_A_RECALL_WITHOUT_RELAXING_HARD_GATES",
+    "IMPROVE_M1BR_RECOVERY_RECALL_WITHOUT_INCREASING_FALSE_QUALIFICATION",
+    "FREEZE_FINAL_DEV_ACCEPTANCE_THRESHOLD_BEFORE_HOLDOUT"
+  ]
+}

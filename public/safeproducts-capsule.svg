@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SafeProducts</title>
+  <desc id="desc">SafeProducts capsule logo</desc>
+  <defs>
+    <clipPath id="capsule">
+      <rect x="40" y="156" width="432" height="200" rx="100" />
+    </clipPath>
+  </defs>
+  <rect width="512" height="512" fill="#121920" />
+  <g clip-path="url(#capsule)">
+    <rect x="40" y="156" width="216" height="200" fill="#4ADE80" />
+    <rect x="256" y="156" width="216" height="200" fill="#121920" />
+  </g>
+  <rect x="40" y="156" width="432" height="200" rx="100" fill="none" stroke="#4ADE80" stroke-width="12" />
+  <line x1="256" y1="166" x2="256" y2="346" stroke="#FB923C" stroke-width="8" />
+  <text x="238" y="271" text-anchor="end" dominant-baseline="middle" font-family="Arial, Helvetica, sans-serif" font-size="66" font-weight="800" fill="#121920">Safe</text>
+  <text x="270" y="271" text-anchor="start" dominant-baseline="middle" font-family="Arial, Helvetica, sans-serif" font-size="51" font-weight="800" fill="#FB923C">Products</text>
+</svg>

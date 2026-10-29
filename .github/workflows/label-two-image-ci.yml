@@ -1,0 +1,49 @@
+name: Two Image Label Flow CI
+
+on:
+  push:
+    branches:
+      - feat/two-image-label-eligibility-2026-09-18
+      - feat/label-catalog-gril-autoflow-2026-09-18
+  pull_request:
+    paths:
+      - 'src/routes/check-my-label.tsx'
+      - 'src/components/CameraCapture.tsx'
+      - 'src/lib/labelPair.functions.ts'
+      - 'src/lib/labels.functions.ts'
+      - 'supabase/functions/sp-label-pair-validate-v1/**'
+      - 'supabase/functions/sp-label-catalog-ingest-v1/**'
+      - 'supabase/migrations/**'
+      - 'src/components/PwaInstallProvider.tsx'
+      - 'src/components/HeaderInstallShortcut.tsx'
+      - 'src/components/PwaInstallBanner.tsx'
+      - 'src/components/PwaInstallSection.tsx'
+      - 'src/routes/__root.tsx'
+      - 'public/manifest.json'
+      - 'public/download-app-icon.png'
+      - 'scripts/assert-pwa-install-contract.mjs'
+      - 'package.json'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Canonical backend guard
+        run: bun run check:backend
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Build
+        run: bun run build
