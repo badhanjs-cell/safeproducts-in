@@ -903,6 +903,9 @@
 
     // Verified High-Resolution Product Photographic Image Catalog
     const BRAND_PHOTO_CATALOG = {
+      "beardo": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
+      "beardo de-tan": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
+      "beardo face wash": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
       "dove": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80",
       "himalaya": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
       "himalaya baby": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
@@ -919,7 +922,7 @@
       "the derma co": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&auto=format&fit=crop&q=80",
       "plum": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=80",
       "plum goodness": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=80",
-      "dot & key": "https://images.unsplash.com/photo-1556228722-d0b71ff8b493?w=400&auto=format&fit=crop&q=80",
+      "dot & key": "https://images.unsplash.com/photo-1608248597359-598d9753e144?w=400&auto=format&fit=crop&q=80",
       "biotique": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80",
       "pears": "https://images.unsplash.com/photo-1607602132700-068258431c6c?w=400&auto=format&fit=crop&q=80",
       "tata 1mg": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=80",
@@ -934,64 +937,72 @@
       "vizylac": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&auto=format&fit=crop&q=80"
     };
 
-    // Photorealistic 3D SVG Product Pack Generator (Crisp, High-Resolution, Instant Offline Render)
+    // Photorealistic 3D SVG Product Pack Generator (Crisp, High-Resolution, XML Safe ID)
     function generateRealisticProductPackSVG(brand, productTitle, pack, categoryKey) {
       const palettes = {
-        cosmetics: { bottle: "#EDE9FE", dark: "#C4B5FD", cap: "#7C3AED", accent: "#8B5CF6" },
-        baby_care: { bottle: "#EFF6FF", dark: "#BFDBFE", cap: "#38BDF8", accent: "#0284C7" },
-        personal_care: { bottle: "#F0FDF4", dark: "#BBF7D0", cap: "#059669", accent: "#10B981" },
-        health_supplements: { bottle: "#FEF3C7", dark: "#FDE68A", cap: "#D97706", accent: "#F59E0B" },
-        nutraceuticals: { bottle: "#ECFDF5", dark: "#A7F3D0", cap: "#16A34A", accent: "#22C55E" },
-        special_dietary: { bottle: "#FDF2F8", dark: "#FBCFE8", cap: "#DB2777", accent: "#EC4899" },
-        probiotics: { bottle: "#F0FDFA", dark: "#99F6E4", cap: "#0D9488", accent: "#14B8A6" }
+        cosmetics: { bottle: "#EDE9FE", dark: "#C4B5FD", cap: "#7C3AED", accent: "#8B5CF6", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        baby_care: { bottle: "#EFF6FF", dark: "#BFDBFE", cap: "#38BDF8", accent: "#0284C7", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        personal_care: { bottle: "#F0FDF4", dark: "#BBF7D0", cap: "#059669", accent: "#10B981", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        health_supplements: { bottle: "#FEF3C7", dark: "#FDE68A", cap: "#D97706", accent: "#F59E0B", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        nutraceuticals: { bottle: "#ECFDF5", dark: "#A7F3D0", cap: "#16A34A", accent: "#22C55E", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        special_dietary: { bottle: "#FDF2F8", dark: "#FBCFE8", cap: "#DB2777", accent: "#EC4899", labelBg: "#FFFFFF", textLight: "#0F172A" },
+        probiotics: { bottle: "#F0FDFA", dark: "#99F6E4", cap: "#0D9488", accent: "#14B8A6", labelBg: "#FFFFFF", textLight: "#0F172A" }
       };
-      const pal = palettes[categoryKey] || palettes.personal_care;
+
       const cleanBrand = (brand || "SafeProducts").toUpperCase();
+      const safeId = cleanBrand.replace(/[^a-zA-Z0-9]/g, "_");
+      const isBeardo = cleanBrand.includes("BEARDO");
+
+      // Custom masculine matte-black & coffee warm gold styling for Beardo
+      const pal = isBeardo
+        ? { bottle: "#1C1F26", dark: "#0B0D11", cap: "#D97706", accent: "#F59E0B", labelBg: "#12141A", textLight: "#F8FAFC" }
+        : (palettes[categoryKey] || palettes.personal_care);
+
       let cleanTitle = productTitle || "Formulation";
       if (cleanTitle.length > 24) cleanTitle = cleanTitle.substring(0, 22) + "…";
-      const cleanPack = pack || "200 ml";
+      const cleanPack = pack || "100 ml";
 
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="100%" height="100%">
           <defs>
-            <radialGradient id="sh_${cleanBrand}" cx="50%" cy="50%" r="50%">
+            <radialGradient id="sh_${safeId}" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#000000" stop-opacity="0.32"/>
               <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
             </radialGradient>
-            <linearGradient id="bg_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="bg_${safeId}" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="${pal.bottle}"/>
-              <stop offset="25%" stop-color="#FFFFFF"/>
+              <stop offset="25%" stop-color="${isBeardo ? '#2A2E38' : '#FFFFFF'}"/>
               <stop offset="70%" stop-color="${pal.bottle}"/>
               <stop offset="100%" stop-color="${pal.dark}"/>
             </linearGradient>
-            <linearGradient id="cg_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="cg_${safeId}" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="${pal.cap}"/>
               <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.45"/>
               <stop offset="100%" stop-color="${pal.cap}"/>
             </linearGradient>
-            <linearGradient id="hi_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+            <linearGradient id="hi_${safeId}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5"/>
               <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
             </linearGradient>
           </defs>
-          <ellipse cx="100" cy="222" rx="58" ry="10" fill="url(#sh_${cleanBrand})"/>
-          <rect x="94" y="24" width="12" height="18" fill="url(#cg_${cleanBrand})" rx="2"/>
+          <ellipse cx="100" cy="222" rx="58" ry="10" fill="url(#sh_${safeId})"/>
+          <rect x="94" y="24" width="12" height="18" fill="url(#cg_${safeId})" rx="2"/>
           <path d="M80 24 C80 18 90 14 100 14 C110 14 120 18 120 24 Z" fill="${pal.cap}"/>
           <path d="M96 14 L96 6 C96 4 104 4 104 6 L104 14 Z" fill="#64748B"/>
           <path d="M88 6 L124 6 C128 6 130 9 128 11 L122 13 L88 8 Z" fill="${pal.cap}"/>
-          <rect x="86" y="42" width="28" height="8" fill="url(#cg_${cleanBrand})" rx="2"/>
-          <rect x="90" y="50" width="20" height="12" fill="url(#bg_${cleanBrand})"/>
-          <rect x="52" y="62" width="96" height="152" rx="28" fill="url(#bg_${cleanBrand})" stroke="#CBD5E1" stroke-width="1.5"/>
-          <rect x="60" y="66" width="10" height="142" rx="5" fill="url(#hi_${cleanBrand})"/>
-          <rect x="62" y="90" width="76" height="106" rx="10" fill="#FFFFFF" fill-opacity="0.95" stroke="${pal.accent}" stroke-width="1.2"/>
-          <circle cx="100" cy="106" r="8" fill="${pal.cap}" fill-opacity="0.15"/>
+          <rect x="86" y="42" width="28" height="8" fill="url(#cg_${safeId})" rx="2"/>
+          <rect x="90" y="50" width="20" height="12" fill="url(#bg_${safeId})"/>
+          <rect x="52" y="62" width="96" height="152" rx="28" fill="url(#bg_${safeId})" stroke="${isBeardo ? '#334155' : '#CBD5E1'}" stroke-width="1.5"/>
+          <rect x="60" y="66" width="10" height="142" rx="5" fill="url(#hi_${safeId})"/>
+          <rect x="62" y="90" width="76" height="106" rx="10" fill="${pal.labelBg}" fill-opacity="0.96" stroke="${pal.accent}" stroke-width="1.2"/>
+          <circle cx="100" cy="106" r="8" fill="${pal.cap}" fill-opacity="${isBeardo ? '0.25' : '0.15'}"/>
           <text x="100" y="109" font-family="-apple-system, sans-serif" font-size="8" font-weight="900" text-anchor="middle" fill="${pal.cap}">✓</text>
-          <text x="100" y="126" font-family="-apple-system, sans-serif" font-size="9.5" font-weight="900" text-anchor="middle" fill="#0F172A" letter-spacing="0.5">${cleanBrand}</text>
-          <line x1="72" y1="131" x2="128" y2="131" stroke="${pal.accent}" stroke-width="1" stroke-opacity="0.4"/>
-          <text x="100" y="145" font-family="-apple-system, sans-serif" font-size="7.5" font-weight="700" text-anchor="middle" fill="#334155">${cleanTitle}</text>
-          <rect x="74" y="156" width="52" height="14" rx="7" fill="${pal.accent}" fill-opacity="0.12"/>
-          <text x="100" y="166" font-family="-apple-system, sans-serif" font-size="7" font-weight="800" text-anchor="middle" fill="${pal.cap}">${cleanPack}</text>
-          <text x="100" y="184" font-family="-apple-system, sans-serif" font-size="5.5" font-weight="800" text-anchor="middle" fill="#64748B" letter-spacing="0.5">SAFEPRODUCTS VERIFIED</text>
+          <text x="100" y="126" font-family="-apple-system, sans-serif" font-size="9.5" font-weight="900" text-anchor="middle" fill="${pal.textLight}" letter-spacing="0.5">${cleanBrand}</text>
+          <line x1="72" y1="131" x2="128" y2="131" stroke="${pal.accent}" stroke-width="1" stroke-opacity="0.5"/>
+          <text x="100" y="145" font-family="-apple-system, sans-serif" font-size="7" font-weight="700" text-anchor="middle" fill="${isBeardo ? '#CBD5E1' : '#334155'}">${cleanTitle}</text>
+          <rect x="74" y="156" width="52" height="14" rx="7" fill="${pal.accent}" fill-opacity="${isBeardo ? '0.25' : '0.12'}"/>
+          <text x="100" y="166" font-family="-apple-system, sans-serif" font-size="7" font-weight="800" text-anchor="middle" fill="${isBeardo ? '#FDE68A' : pal.cap}">${cleanPack}</text>
+          <text x="100" y="184" font-family="-apple-system, sans-serif" font-size="5.5" font-weight="800" text-anchor="middle" fill="${isBeardo ? '#94A3B8' : '#64748B'}" letter-spacing="0.5">SAFEPRODUCTS VERIFIED</text>
         </svg>
       `;
       return "data:image/svg+xml;utf8," + encodeURIComponent(svg.trim());
@@ -1067,6 +1078,7 @@
       }
       // Official Brand D2C Store Landing
       const officialStores = {
+        "beardo": "https://beardo.in/search?q=" + shortQ,
         "dove": "https://www.dove.com/in/search?q=" + shortQ,
         "sebamed": "https://www.sebamedindia.com/search?q=" + shortQ,
         "himalaya": "https://himalayawellness.in/search?q=" + shortQ,
@@ -1091,6 +1103,122 @@
       return `https://www.amazon.in/s?k=${fullQ}`;
     }
 
+    // Dynamic, Realistic Price Scaling with Pack Size Volume Curve
+    function calculateRealisticBasePrice(cleanTopic, catKey, packStr, brand) {
+      const q = ((cleanTopic || "") + " " + (brand || "")).toLowerCase();
+      let benchmark = [240, 200, "ml"]; // default: 200ml lotion @ 240
+      
+      if (q.includes("face wash") || q.includes("cleanser") || q.includes("scrub") || q.includes("detox")) {
+        benchmark = [215, 100, "ml"]; // 100ml face wash ~ ₹215
+      } else if (q.includes("serum") || q.includes("essence") || q.includes("drops") || q.includes("niacinamide")) {
+        benchmark = [449, 30, "ml"]; // 30ml serum ~ ₹449
+      } else if (q.includes("sunscreen") || q.includes("spf")) {
+        benchmark = [399, 50, "ml"]; // 50ml sunscreen ~ ₹399
+      } else if (q.includes("body wash") || q.includes("shower gel") || q.includes("bath")) {
+        benchmark = [195, 200, "ml"]; // 200ml body wash ~ ₹195
+      } else if (q.includes("shampoo") || q.includes("conditioner")) {
+        benchmark = [220, 200, "ml"]; // 200ml shampoo ~ ₹220
+      } else if (q.includes("baby") || catKey === "baby_care") {
+        benchmark = [235, 200, "ml"]; // 200ml baby lotion ~ ₹235
+      } else if (q.includes("lotion") || q.includes("moistur") || q.includes("cream")) {
+        benchmark = [240, 200, "ml"]; // 200ml lotion ~ ₹240
+      } else if (q.includes("oil") || q.includes("beard oil")) {
+        benchmark = [199, 100, "ml"]; // 100ml oil ~ ₹199
+      } else if (q.includes("protein") || catKey === "special_dietary") {
+        benchmark = [640, 400, "g"]; // 400g protein ~ ₹640
+      } else if (q.includes("probiotic") || catKey === "probiotics") {
+        benchmark = [360, 30, "count"]; // 30 caps probiotics ~ ₹360
+      } else if (q.includes("ashwagandha") || catKey === "nutraceuticals") {
+        benchmark = [290, 60, "count"]; // 60 caps nutraceuticals ~ ₹290
+      } else if (catKey === "health_supplements") {
+        benchmark = [399, 60, "count"]; // 60 tablets supplements ~ ₹399
+      }
+
+      const [benchPrice, benchQty] = benchmark;
+      const match = (packStr || "").match(/(\d+(?:\.\d+)?)\s*(ml|g|kg|l|tablets|capsules|tabs|caps|sachets|count)?/i);
+      if (!match) return benchPrice;
+
+      let qty = parseFloat(match[1]);
+      const unit = (match[2] || "").toLowerCase();
+      if (unit === "kg" || unit === "l") qty *= 1000;
+
+      // Realistic volume curve scaling (economy of scale exponent 0.68)
+      const ratio = qty / benchQty;
+      const scaled = benchPrice * Math.pow(ratio, 0.68);
+      const rounded = Math.round(scaled / 5) * 5;
+      return Math.max(79, rounded);
+    }
+
+    // Authentic Iconic Brand Products Catalog (Prevents Absurd Names like "Cetaphil De-tan Coffee Detox")
+    const BRAND_ICONIC_PRODUCTS = {
+      "the derma co": {
+        "face wash": "The Derma Co 1% Salicylic Acid Face Wash",
+        "cleanser": "The Derma Co AHA-BHA Foaming Daily Cleanser",
+        "serum": "The Derma Co 10% Niacinamide Face Serum",
+        "sunscreen": "The Derma Co 1% Hyaluronic Sunscreen Aqua Gel"
+      },
+      "cetaphil": {
+        "face wash": "Cetaphil Gentle Skin Cleanser",
+        "cleanser": "Cetaphil Gentle Skin Cleanser",
+        "lotion": "Cetaphil Moisturising Lotion",
+        "cream": "Cetaphil Moisturising Cream"
+      },
+      "minimalist": {
+        "face wash": "Minimalist 2% Salicylic Acid Face Cleanser",
+        "cleanser": "Minimalist Gentle Skin Cleanser",
+        "serum": "Minimalist 10% Niacinamide Face Serum",
+        "sunscreen": "Minimalist SPF 50 Multi-Vitamin Sunscreen"
+      },
+      "plum goodness": {
+        "face wash": "Plum Green Tea Pore Cleansing Face Wash",
+        "cleanser": "Plum Green Tea Pore Cleansing Face Wash",
+        "serum": "Plum 15% Vitamin C Face Serum"
+      },
+      "dot & key": {
+        "face wash": "Dot & Key Cica Anti-Acne Face Wash",
+        "cleanser": "Dot & Key Cica Anti-Acne Face Wash",
+        "sunscreen": "Dot & Key Vitamin C+E Super Glow Sunscreen"
+      },
+      "himalaya": {
+        "face wash": "Himalaya Purifying Neem Face Wash",
+        "cleanser": "Himalaya Purifying Neem Face Wash",
+        "lotion": "Himalaya Moisturizing Aloe Vera Face & Body Lotion"
+      },
+      "sebamed": {
+        "face wash": "Sebamed Clear Face Cleansing Foam",
+        "cleanser": "Sebamed Liquid Face & Body Wash"
+      },
+      "beardo": {
+        "face wash": "Beardo De-tan Face Wash Coffee Detox",
+        "cleanser": "Beardo De-tan Face Wash Coffee Detox",
+        "oil": "Beardo Godfather Beard Oil"
+      }
+    };
+
+    function resolveAlternativeProductTitle(brandName, cleanTopic, coreProduct, pack) {
+      const bLow = brandName.toLowerCase();
+      const qLow = (cleanTopic + " " + coreProduct).toLowerCase();
+
+      if (BRAND_ICONIC_PRODUCTS[bLow]) {
+        for (const [key, title] of Object.entries(BRAND_ICONIC_PRODUCTS[bLow])) {
+          if (qLow.includes(key)) {
+            return `${title} (${pack})`;
+          }
+        }
+      }
+
+      // Check generic product forms
+      const forms = ["face wash", "body wash", "cleanser", "serum", "sunscreen", "lotion", "shampoo", "soap", "cream", "oil"];
+      for (const f of forms) {
+        if (qLow.includes(f)) {
+          return `${brandName} ${f.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())} (${pack})`;
+        }
+      }
+
+      let altConcept = coreProduct.replace(new RegExp(pack, "ig"), "").trim();
+      return `${brandName} ${altConcept} (${pack})`;
+    }
+
     // Comprehensive Conversational Intent & Spoken Query Parser (Hindi, Hinglish, English)
     function parseConversationalQuery(rawQ, activeProfile) {
       const raw = (rawQ || "").trim();
@@ -1098,8 +1226,8 @@
         return {
           raw: "",
           profile: activeProfile || "ALL",
-          categoryKey: "health_supplements",
-          displayTopic: "Health Supplements",
+          categoryKey: "personal_care",
+          displayTopic: "Personal Care",
           isConversational: false
         };
       }
@@ -1152,20 +1280,22 @@
 
       // 3. Regulated Category Detection
       const checkStr = (raw + " " + cleaned).toLowerCase();
-      let catKey = "health_supplements";
+      let catKey = "personal_care";
 
       if (/probiotic|gut|lactobacillus|flora|sporlac|vizylac|hazma|digestion/i.test(checkStr)) {
         catKey = "probiotics";
       } else if (detectedProfile === "Children" || /baby|infant|diaper|pediatric|chicco|shishu/i.test(checkStr)) {
         catKey = "baby_care";
-      } else if (/sunscreen|serum|niacinamide|cream|moistur|cosmetic|face|spf|glow|pigmentation/i.test(checkStr)) {
+      } else if (/sunscreen|serum|niacinamide|spf|glow|pigmentation/i.test(checkStr)) {
         catKey = "cosmetics";
-      } else if (/shampoo|soap|sabun|toothpaste|wash|body wash|deodorant|lotion|oil|tel|cleanser/i.test(checkStr)) {
+      } else if (/face wash|cleanser|shampoo|soap|sabun|toothpaste|wash|body wash|deodorant|lotion|oil|tel|cream|moistur|detox/i.test(checkStr)) {
         catKey = (detectedProfile === "Children") ? "baby_care" : "personal_care";
       } else if (/protein|ensure|protinex|diabetic|dietary|maternal|celevida|powder/i.test(checkStr)) {
         catKey = "special_dietary";
       } else if (/ashwagandha|tulsi|curcumin|giloy|triphala|herbal|nutraceutical|chyawanprash|ayurvedic/i.test(checkStr)) {
         catKey = "nutraceuticals";
+      } else if (/vitamin|mineral|supplement|calcium|iron|zinc/i.test(checkStr)) {
+        catKey = "health_supplements";
       }
 
       // 4. Topic Normalization
@@ -1189,7 +1319,7 @@
           special_dietary: "Protein Powder",
           probiotics: "Probiotics"
         };
-        cleaned = defaults[catKey] || "Health Supplements";
+        cleaned = defaults[catKey] || "Personal Care";
       }
 
       // Capitalize clean topic
@@ -1444,12 +1574,15 @@
       // Primary Product Image Resolution
       const primaryMedia = resolveProductImage(primaryBrand, productTitle, pack, catKey);
 
+      // Dynamic Realistic Price Scaling with Pack Size
+      const dynamicBasePrice = calculateRealisticBasePrice(cleanTopic, catKey, pack, primaryBrand);
+
       // Dynamic Merchant Pool
       const dynamicMerchants = isNewMarketBrand
         ? [`${primaryBrand} Official Store (D2C / Shopify)`, ...tpl.merchants]
         : [...tpl.merchants.slice(0, 4), `${primaryBrand} Official Store (D2C)`];
 
-      // Build 5 Exact Offers with Direct Merchant Buy Now Links
+      // Build 5 Exact Offers with Direct Merchant Buy Now Links & Pack-Scaled Prices
       const seenMerchants = new Set();
       const rawExactOffers = [];
       for (let i = 0; i < dynamicMerchants.length && rawExactOffers.length < 5; i++) {
@@ -1458,7 +1591,7 @@
         if (seenMerchants.has(normM)) continue;
         seenMerchants.add(normM);
 
-        const price = Math.round(tpl.basePrice * (1 + rawExactOffers.length * 0.042));
+        const price = Math.round(dynamicBasePrice * (1 + rawExactOffers.length * 0.042));
         const buyUrl = buildMerchantBuyUrl(merchant, productTitle, primaryBrand);
 
         rawExactOffers.push({
@@ -1485,20 +1618,16 @@
 
       const exactOffers = computeBestChoiceAndBadges(rawExactOffers, true);
 
-      // Build 5 Comparable Alternatives (Distinct Brands)
+      // Build 5 Comparable Alternatives (Distinct Brands with Authentic Iconic Products)
       const altBrands = tpl.brands.filter(b => b.toLowerCase() !== primaryBrand.toLowerCase()).slice(0, 5);
       const rawAlternatives = altBrands.map((brandName, idx) => {
         const scoreOffsets = [3, -1, 1, 0, -2];
         const priceMultipliers = [1.06, 0.89, 0.96, 1.02, 1.11];
         const altScore = Math.max(82, Math.min(98, baseScore + scoreOffsets[idx % scoreOffsets.length]));
-        const altPrice = Math.round(tpl.basePrice * priceMultipliers[idx % priceMultipliers.length]);
+        const altPrice = Math.round(dynamicBasePrice * priceMultipliers[idx % priceMultipliers.length]);
 
-        // Clean Alternative Title without Conversational Junk or Duplicate "Baby"
-        let altConcept = coreProduct.replace(new RegExp(pack, "ig"), "").trim() || tpl.label;
-        if (brandName.toLowerCase().includes("baby") && altConcept.toLowerCase().startsWith("baby ")) {
-          altConcept = altConcept.replace(/^baby\s+/i, "");
-        }
-        const altTitle = `${brandName} ${altConcept} (${pack})`;
+        // Resolve Authentic Alternative Product Title (no bizarre foreign sub-brand concatenations!)
+        const altTitle = resolveAlternativeProductTitle(brandName, cleanTopic, coreProduct, pack);
         const merchant = tpl.merchants[idx % tpl.merchants.length];
         const altMedia = resolveProductImage(brandName, altTitle, pack, catKey);
         const altBuyUrl = buildMerchantBuyUrl(merchant, altTitle, brandName);
@@ -1530,7 +1659,6 @@
       return { exactOffers, alternatives, pack, categoryLabel: tpl.label, ladderInfo, displayTopic: cleanTopic };
     }
 
-    // Render ProductCard (With High-Resolution Image, SVG Fallback, Direct Merchant Buy Now Link, and Un-Clipped Title)
     function renderProductCardHTML(p) {
       const tone = getCardTone(p.id);
       const saved = appState.shortlist.some(item => item.id === p.id);
