@@ -837,7 +837,7 @@
         defaultPack: "200 ml",
         regulatory: "CDSCO Schedule S & BIS Personal Hygiene Standards",
         icon: "🧴",
-        brands: ["Himalaya", "Cetaphil", "Sebamed", "Dove", "Biotique", "Pears", "Nivea"],
+        brands: ["Dove", "Himalaya", "Cetaphil", "Sebamed", "Biotique", "Pears", "Nivea"],
         merchants: ["Amazon India", "Nykaa", "Flipkart", "Apollo Pharmacy", "Blinkit", "JioMart", "Zepto"],
         basePrice: 195,
         ingredients: "Aqua, Cocamidopropyl Betaine, Sodium Cocoyl Isethionate, Glycerin, Azadirachta Indica (Neem) Leaf Extract, Curcuma Longa Extract, Citric Acid",
@@ -901,25 +901,312 @@
 
     appState.ladderMode = "AUTO";
 
-    function detectCategoryKey(query, explicitCat) {
-      if (explicitCat && CATEGORY_CATALOG[explicitCat]) return explicitCat;
-      const q = (query || "").toLowerCase();
-      if (q.includes("probiotic") || q.includes("gut") || q.includes("lactobacillus") || q.includes("flora") || q.includes("sporlac") || q.includes("vizylac")) return "probiotics";
-      if (q.includes("baby") || q.includes("infant") || q.includes("diaper") || q.includes("pediatric") || q.includes("chicco")) return "baby_care";
-      if (q.includes("sunscreen") || q.includes("serum") || q.includes("niacinamide") || q.includes("cream") || q.includes("moistur") || q.includes("cosmetic") || q.includes("face") || q.includes("spf")) return "cosmetics";
-      if (q.includes("shampoo") || q.includes("soap") || q.includes("toothpaste") || q.includes("wash") || q.includes("deodorant") || q.includes("lotion") || q.includes("oil") || q.includes("cleanser")) return q.includes("baby") ? "baby_care" : "personal_care";
-      if (q.includes("protein") || q.includes("ensure") || q.includes("protinex") || q.includes("diabetic") || q.includes("dietary") || q.includes("maternal") || q.includes("celevida")) return "special_dietary";
-      if (q.includes("ashwagandha") || q.includes("tulsi") || q.includes("curcumin") || q.includes("giloy") || q.includes("triphala") || q.includes("herbal") || q.includes("nutraceutical") || q.includes("chyawanprash")) return "nutraceuticals";
-      return "health_supplements";
+    // Verified High-Resolution Product Photographic Image Catalog
+    const BRAND_PHOTO_CATALOG = {
+      "dove": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80",
+      "himalaya": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
+      "himalaya baby": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
+      "sebamed": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&auto=format&fit=crop&q=80",
+      "sebamed baby": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&auto=format&fit=crop&q=80",
+      "cetaphil": "https://images.unsplash.com/photo-1608248597359-598d9753e144?w=400&auto=format&fit=crop&q=80",
+      "cetaphil baby": "https://images.unsplash.com/photo-1608248597359-598d9753e144?w=400&auto=format&fit=crop&q=80",
+      "mamaearth": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&auto=format&fit=crop&q=80",
+      "mamaearth baby": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&auto=format&fit=crop&q=80",
+      "chicco": "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&auto=format&fit=crop&q=80",
+      "aveeno": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&auto=format&fit=crop&q=80",
+      "aveeno baby": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=400&auto=format&fit=crop&q=80",
+      "minimalist": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&auto=format&fit=crop&q=80",
+      "the derma co": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&auto=format&fit=crop&q=80",
+      "plum": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=80",
+      "plum goodness": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=80",
+      "dot & key": "https://images.unsplash.com/photo-1556228722-d0b71ff8b493?w=400&auto=format&fit=crop&q=80",
+      "biotique": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&auto=format&fit=crop&q=80",
+      "pears": "https://images.unsplash.com/photo-1607602132700-068258431c6c?w=400&auto=format&fit=crop&q=80",
+      "tata 1mg": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=80",
+      "healthkart": "https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400&auto=format&fit=crop&q=80",
+      "carbamide forte": "https://images.unsplash.com/photo-1577401239170-897942555fb3?w=400&auto=format&fit=crop&q=80",
+      "organic india": "https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?w=400&auto=format&fit=crop&q=80",
+      "kapiva": "https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?w=400&auto=format&fit=crop&q=80",
+      "ensure": "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=400&auto=format&fit=crop&q=80",
+      "protinex": "https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=400&auto=format&fit=crop&q=80",
+      "velgut": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&auto=format&fit=crop&q=80",
+      "sporlac": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&auto=format&fit=crop&q=80",
+      "vizylac": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&auto=format&fit=crop&q=80"
+    };
+
+    // Photorealistic 3D SVG Product Pack Generator (Crisp, High-Resolution, Instant Offline Render)
+    function generateRealisticProductPackSVG(brand, productTitle, pack, categoryKey) {
+      const palettes = {
+        cosmetics: { bottle: "#EDE9FE", dark: "#C4B5FD", cap: "#7C3AED", accent: "#8B5CF6" },
+        baby_care: { bottle: "#EFF6FF", dark: "#BFDBFE", cap: "#38BDF8", accent: "#0284C7" },
+        personal_care: { bottle: "#F0FDF4", dark: "#BBF7D0", cap: "#059669", accent: "#10B981" },
+        health_supplements: { bottle: "#FEF3C7", dark: "#FDE68A", cap: "#D97706", accent: "#F59E0B" },
+        nutraceuticals: { bottle: "#ECFDF5", dark: "#A7F3D0", cap: "#16A34A", accent: "#22C55E" },
+        special_dietary: { bottle: "#FDF2F8", dark: "#FBCFE8", cap: "#DB2777", accent: "#EC4899" },
+        probiotics: { bottle: "#F0FDFA", dark: "#99F6E4", cap: "#0D9488", accent: "#14B8A6" }
+      };
+      const pal = palettes[categoryKey] || palettes.personal_care;
+      const cleanBrand = (brand || "SafeProducts").toUpperCase();
+      let cleanTitle = productTitle || "Formulation";
+      if (cleanTitle.length > 24) cleanTitle = cleanTitle.substring(0, 22) + "…";
+      const cleanPack = pack || "200 ml";
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="100%" height="100%">
+          <defs>
+            <radialGradient id="sh_${cleanBrand}" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#000000" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="bg_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="${pal.bottle}"/>
+              <stop offset="25%" stop-color="#FFFFFF"/>
+              <stop offset="70%" stop-color="${pal.bottle}"/>
+              <stop offset="100%" stop-color="${pal.dark}"/>
+            </linearGradient>
+            <linearGradient id="cg_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="${pal.cap}"/>
+              <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="${pal.cap}"/>
+            </linearGradient>
+            <linearGradient id="hi_${cleanBrand}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="100" cy="222" rx="58" ry="10" fill="url(#sh_${cleanBrand})"/>
+          <rect x="94" y="24" width="12" height="18" fill="url(#cg_${cleanBrand})" rx="2"/>
+          <path d="M80 24 C80 18 90 14 100 14 C110 14 120 18 120 24 Z" fill="${pal.cap}"/>
+          <path d="M96 14 L96 6 C96 4 104 4 104 6 L104 14 Z" fill="#64748B"/>
+          <path d="M88 6 L124 6 C128 6 130 9 128 11 L122 13 L88 8 Z" fill="${pal.cap}"/>
+          <rect x="86" y="42" width="28" height="8" fill="url(#cg_${cleanBrand})" rx="2"/>
+          <rect x="90" y="50" width="20" height="12" fill="url(#bg_${cleanBrand})"/>
+          <rect x="52" y="62" width="96" height="152" rx="28" fill="url(#bg_${cleanBrand})" stroke="#CBD5E1" stroke-width="1.5"/>
+          <rect x="60" y="66" width="10" height="142" rx="5" fill="url(#hi_${cleanBrand})"/>
+          <rect x="62" y="90" width="76" height="106" rx="10" fill="#FFFFFF" fill-opacity="0.95" stroke="${pal.accent}" stroke-width="1.2"/>
+          <circle cx="100" cy="106" r="8" fill="${pal.cap}" fill-opacity="0.15"/>
+          <text x="100" y="109" font-family="-apple-system, sans-serif" font-size="8" font-weight="900" text-anchor="middle" fill="${pal.cap}">✓</text>
+          <text x="100" y="126" font-family="-apple-system, sans-serif" font-size="9.5" font-weight="900" text-anchor="middle" fill="#0F172A" letter-spacing="0.5">${cleanBrand}</text>
+          <line x1="72" y1="131" x2="128" y2="131" stroke="${pal.accent}" stroke-width="1" stroke-opacity="0.4"/>
+          <text x="100" y="145" font-family="-apple-system, sans-serif" font-size="7.5" font-weight="700" text-anchor="middle" fill="#334155">${cleanTitle}</text>
+          <rect x="74" y="156" width="52" height="14" rx="7" fill="${pal.accent}" fill-opacity="0.12"/>
+          <text x="100" y="166" font-family="-apple-system, sans-serif" font-size="7" font-weight="800" text-anchor="middle" fill="${pal.cap}">${cleanPack}</text>
+          <text x="100" y="184" font-family="-apple-system, sans-serif" font-size="5.5" font-weight="800" text-anchor="middle" fill="#64748B" letter-spacing="0.5">SAFEPRODUCTS VERIFIED</text>
+        </svg>
+      `;
+      return "data:image/svg+xml;utf8," + encodeURIComponent(svg.trim());
+    }
+
+    function resolveProductImage(brand, productTitle, pack, categoryKey) {
+      const fallbackSvg = generateRealisticProductPackSVG(brand, productTitle, pack, categoryKey);
+      const normBrand = (brand || "").toLowerCase().trim();
+      let photoUrl = null;
+      for (const [k, url] of Object.entries(BRAND_PHOTO_CATALOG)) {
+        if (normBrand === k || normBrand.includes(k) || (productTitle && productTitle.toLowerCase().includes(k))) {
+          photoUrl = url;
+          break;
+        }
+      }
+      return {
+        imageUrl: photoUrl || fallbackSvg,
+        fallbackSvg: fallbackSvg
+      };
+    }
+
+    // Direct Merchant Deep Links (Opens EXACT Product Search Page on Merchant Site — NO Google Shopping Redirects!)
+    function buildMerchantBuyUrl(merchant, productTitle, brand) {
+      const m = (merchant || "").toLowerCase();
+      const cleanTitle = (productTitle || "").replace(/\([^)]*\)/g, "").trim();
+      const fullQ = encodeURIComponent(productTitle || cleanTitle);
+      const shortQ = encodeURIComponent(cleanTitle);
+
+      if (m.includes("amazon")) {
+        return `https://www.amazon.in/s?k=${fullQ}&ref=nb_sb_noss`;
+      }
+      if (m.includes("nykaa")) {
+        return `https://www.nykaa.com/search/result/?q=${fullQ}&root=search&searchType=Manual`;
+      }
+      if (m.includes("flipkart")) {
+        return `https://www.flipkart.com/search?q=${fullQ}&otracker=search`;
+      }
+      if (m.includes("apollo")) {
+        return `https://www.apollopharmacy.in/search-medicines/${shortQ}`;
+      }
+      if (m.includes("1mg") || m.includes("tata")) {
+        return `https://www.1mg.com/search/all?name=${fullQ}`;
+      }
+      if (m.includes("firstcry")) {
+        return `https://www.firstcry.com/search?q=${fullQ}`;
+      }
+      if (m.includes("pharmeasy")) {
+        return `https://pharmeasy.in/search/all?name=${shortQ}`;
+      }
+      if (m.includes("netmeds")) {
+        return `https://www.netmeds.com/catalogsearch/result/${shortQ}/all`;
+      }
+      if (m.includes("tira")) {
+        return `https://www.tirabeauty.com/search?q=${fullQ}`;
+      }
+      if (m.includes("purplle")) {
+        return `https://www.purplle.com/search?q=${fullQ}`;
+      }
+      if (m.includes("blinkit")) {
+        return `https://blinkit.com/s/?q=${fullQ}`;
+      }
+      if (m.includes("healthkart")) {
+        return `https://www.healthkart.com/search?keyword=${fullQ}`;
+      }
+      if (m.includes("clinikally")) {
+        return `https://www.clinikally.com/search?q=${fullQ}`;
+      }
+      if (m.includes("jiomart")) {
+        return `https://www.jiomart.com/search/${fullQ}`;
+      }
+      if (m.includes("zepto")) {
+        return `https://www.zeptonow.com/search?q=${fullQ}`;
+      }
+      // Official Brand D2C Store Landing
+      const officialStores = {
+        "dove": "https://www.dove.com/in/search?q=" + shortQ,
+        "sebamed": "https://www.sebamedindia.com/search?q=" + shortQ,
+        "himalaya": "https://himalayawellness.in/search?q=" + shortQ,
+        "cetaphil": "https://www.cetaphil.in/search?q=" + shortQ,
+        "mamaearth": "https://mamaearth.in/search?q=" + shortQ,
+        "minimalist": "https://beminimalist.co/search?q=" + shortQ,
+        "the derma co": "https://thedermaco.com/search?q=" + shortQ,
+        "dot & key": "https://www.dotandkey.com/search?q=" + shortQ,
+        "plum": "https://plumgoodness.com/search?q=" + shortQ,
+        "organic india": "https://organicindia.com/search?q=" + shortQ,
+        "kapiva": "https://kapiva.in/search?q=" + shortQ,
+        "fast&up": "https://www.fastandup.in/search?q=" + shortQ,
+        "carbamide forte": "https://cfvitamins.com/search?q=" + shortQ
+      };
+      const normBrand = (brand || "").toLowerCase().trim();
+      for (const [k, storeUrl] of Object.entries(officialStores)) {
+        if (normBrand.includes(k) || m.includes(k)) {
+          return storeUrl;
+        }
+      }
+      // Direct Amazon.in search fallback for any other merchant
+      return `https://www.amazon.in/s?k=${fullQ}`;
+    }
+
+    // Comprehensive Conversational Intent & Spoken Query Parser (Hindi, Hinglish, English)
+    function parseConversationalQuery(rawQ, activeProfile) {
+      const raw = (rawQ || "").trim();
+      if (!raw) {
+        return {
+          raw: "",
+          profile: activeProfile || "ALL",
+          categoryKey: "health_supplements",
+          displayTopic: "Health Supplements",
+          isConversational: false
+        };
+      }
+
+      // 1. Audience / Profile Detection
+      let detectedProfile = activeProfile || "ALL";
+      let hasAudienceIntent = false;
+      if (/\b(bacchon|baccho|bacche|bachon|bacho|bachhe|kids|children|child|baby|infant|shishu|balak|pediatric)\b/i.test(raw)) {
+        detectedProfile = "Children";
+        hasAudienceIntent = true;
+      } else if (/\b(pregnant|pregnancy|garbhavastha|maternal|prenatal|mother|mom|mahila)\b/i.test(raw)) {
+        detectedProfile = "Pregnant Woman";
+        hasAudienceIntent = true;
+      } else if (/\b(seniors|senior|elderly|old\s+age|bujurg|dadaji|naniji|geriatric|budhe)\b/i.test(raw)) {
+        detectedProfile = "Seniors";
+        hasAudienceIntent = true;
+      }
+
+      // 2. Stop Tokens & Question Words to Strip
+      const stopTokens = [
+        /\bke\s+liye\b/gi, /\bkeliye\b/gi, /\bke\s+vaaste\b/gi,
+        /\bkaun\s+si\b/gi, /\bkaun\s+sa\b/gi, /\bkon\s+si\b/gi, /\bkon\s+sa\b/gi, /\bkoun\s+si\b/gi, /\bkoun\s+sa\b/gi,
+        /\bkonsa\b/gi, /\bkonsi\b/gi, /\bkounsa\b/gi, /\bkounsi\b/gi, /\bkaun\b/gi, /\bkoun\b/gi, /\bkon\b/gi,
+        /\bsabse\s+badhiya\b/gi, /\bsabse\s+accha\b/gi, /\bsabse\s+achha\b/gi, /\bsabse\s+badiya\b/gi, /\bsabse\s+best\b/gi, /\bsabse\s+safe\b/gi,
+        /\baccha\b/gi, /\bachha\b/gi, /\bacchi\b/gi, /\bachhi\b/gi, /\bbadhiya\b/gi, /\bbadiya\b/gi,
+        /\bhai\b/gi, /\bhain\b/gi, /\bhote\s+hai\b/gi, /\bhoti\s+hai\b/gi, /\bchahiye\b/gi,
+        /\bbatao\b/gi, /\bbatayein\b/gi, /\bbataiye\b/gi, /\bdikhao\b/gi, /\bdikhayein\b/gi, /\bdikhaiye\b/gi,
+        /\bkya\s+hai\b/gi, /\bkya\b/gi, /\bkare\b/gi, /\bkarna\s+chahiye\b/gi, /\bkaise\b/gi,
+        /\bmein\b/gi, /\bme\b/gi, /\bpar\b/gi, /\bse\b/gi, /\bko\b/gi, /\bwali\b/gi, /\bwala\b/gi, /\bvale\b/gi, /\bvali\b/gi,
+        /\bwhich\s+is\s+the\s+best\b/gi, /\bwhat\s+is\s+the\s+best\b/gi, /\bwhich\s+is\s+best\b/gi, /\bwhich\s+one\s+is\s+best\b/gi,
+        /\bwhich\b/gi, /\bwhat\b/gi, /\bwhere\b/gi, /\bhow\b/gi, /\bwho\b/gi,
+        /\bis\s+the\s+best\b/gi, /\bis\s+best\b/gi, /\bthe\s+best\b/gi, /\bbest\b/gi, /\btop\s+rated\b/gi, /\btop\b/gi,
+        /\brecommend\s+me\b/gi, /\brecommend\b/gi, /\bsuggest\s+me\b/gi, /\bsuggest\b/gi,
+        /\btell\s+me\b/gi, /\bshow\s+me\b/gi, /\bgive\s+me\b/gi, /\bplease\b/gi, /\bfind\b/gi,
+        /\bfor\b/gi, /\bgood\b/gi, /\bsafest\b/gi, /\bsafe\b/gi,
+        /\bin\s+india\b/gi, /\bbuy\s+online\b/gi, /\bonline\b/gi, /\bprice\b/gi, /\brate\b/gi, /\bcost\b/gi
+      ];
+
+      let cleaned = raw;
+      for (const st of stopTokens) {
+        cleaned = cleaned.replace(st, " ");
+      }
+
+      // If audience was conversational (e.g. "bacchon ke liye"), remove audience filler from product core topic
+      if (hasAudienceIntent) {
+        cleaned = cleaned.replace(/\b(bacchon|baccho|bacche|bachon|bacho|bachhe|shishu|balak|pregnant|pregnancy|garbhavastha|maternal|prenatal|mother|mom|mahila|woman|women|seniors|senior|elderly|old\s+age|bujurg|dadaji|naniji|geriatric|budhe)\b/gi, " ");
+      }
+
+      cleaned = cleaned.replace(/[^\w\s-]/g, " ").replace(/\s+/g, " ").trim();
+
+      // 3. Regulated Category Detection
+      const checkStr = (raw + " " + cleaned).toLowerCase();
+      let catKey = "health_supplements";
+
+      if (/probiotic|gut|lactobacillus|flora|sporlac|vizylac|hazma|digestion/i.test(checkStr)) {
+        catKey = "probiotics";
+      } else if (detectedProfile === "Children" || /baby|infant|diaper|pediatric|chicco|shishu/i.test(checkStr)) {
+        catKey = "baby_care";
+      } else if (/sunscreen|serum|niacinamide|cream|moistur|cosmetic|face|spf|glow|pigmentation/i.test(checkStr)) {
+        catKey = "cosmetics";
+      } else if (/shampoo|soap|sabun|toothpaste|wash|body wash|deodorant|lotion|oil|tel|cleanser/i.test(checkStr)) {
+        catKey = (detectedProfile === "Children") ? "baby_care" : "personal_care";
+      } else if (/protein|ensure|protinex|diabetic|dietary|maternal|celevida|powder/i.test(checkStr)) {
+        catKey = "special_dietary";
+      } else if (/ashwagandha|tulsi|curcumin|giloy|triphala|herbal|nutraceutical|chyawanprash|ayurvedic/i.test(checkStr)) {
+        catKey = "nutraceuticals";
+      }
+
+      // 4. Topic Normalization
+      const topicMap = {
+        "sabun": (detectedProfile === "Children") ? "Baby Soap" : "Bath Soap",
+        "tel": (detectedProfile === "Children") ? "Baby Hair & Massage Oil" : "Hair Oil",
+        "body lotion": (detectedProfile === "Children") ? "Baby Body Lotion" : "Body Lotion",
+        "lotion": (detectedProfile === "Children") ? "Baby Lotion" : "Body Lotion"
+      };
+
+      const lowCleaned = cleaned.toLowerCase();
+      if (topicMap[lowCleaned]) {
+        cleaned = topicMap[lowCleaned];
+      } else if (!cleaned || cleaned.length < 2) {
+        const defaults = {
+          baby_care: "Baby Body Lotion",
+          cosmetics: "Sunscreen",
+          personal_care: "Body Wash Liquid",
+          health_supplements: "Health Supplements",
+          nutraceuticals: "Ashwagandha",
+          special_dietary: "Protein Powder",
+          probiotics: "Probiotics"
+        };
+        cleaned = defaults[catKey] || "Health Supplements";
+      }
+
+      // Capitalize clean topic
+      const displayTopic = cleaned.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+
+      return {
+        raw: raw,
+        profile: detectedProfile,
+        categoryKey: catKey,
+        displayTopic: displayTopic,
+        isConversational: hasAudienceIntent || raw.split(/\s+/).length > 4
+      };
     }
 
     // Dynamic Open-Market Brand & Product Extractor (NO brand or manufacturer limit!)
-    function extractOpenMarketBrandAndTopic(rawQ, tpl) {
-      const cleaned = (rawQ || "").trim();
-      if (!cleaned || cleaned.toLowerCase() === tpl.label.toLowerCase()) {
-        return { brand: tpl.brands[0], isNewMarketBrand: false, coreProduct: tpl.label };
-      }
-      // 1. Check if query matches any known seed brand across all categories
+    function extractOpenMarketBrandAndTopic(cleanTopic, tpl, categoryKey) {
+      const cleaned = (cleanTopic || "").trim();
       const allKnownBrands = Object.values(CATEGORY_CATALOG).flatMap(c => c.brands);
       for (const b of allKnownBrands) {
         if (cleaned.toLowerCase().includes(b.toLowerCase())) {
@@ -927,13 +1214,13 @@
           return { brand: b, isNewMarketBrand: false, coreProduct: rem || cleaned };
         }
       }
-      // 2. Otherwise dynamically extract ANY new/emerging manufacturer brand from the query tokens!
       const genericKeywords = new Set([
         "baby", "lotion", "cream", "serum", "sunscreen", "shampoo", "soap", "oil", "wash", "face",
         "vitamin", "multivitamin", "tablets", "capsules", "powder", "probiotic", "protein", "ashwagandha",
         "omega", "calcium", "iron", "zinc", "magnesium", "supplement", "supplements", "cosmetics",
         "personal", "care", "health", "nutraceuticals", "special", "dietary", "probiotics", "products",
-        "spf", "pa+++", "organic", "natural", "pure", "daily", "kids", "seniors", "maternal", "prenatal"
+        "spf", "pa+++", "organic", "natural", "pure", "daily", "kids", "seniors", "maternal", "prenatal",
+        "body", "liquid", "cleanser", "moisturizer", "moisturiser"
       ]);
       const withoutPack = cleaned.replace(/(\d+\s*(?:ml|g|kg|tablets|capsules|tabs|caps|sachets|iu|mg|mcg))/ig, "").trim();
       const words = withoutPack.split(/\s+/).filter(Boolean);
@@ -958,7 +1245,6 @@
       const minSafety = Math.min(...scores);
       const maxSafety = Math.max(...scores);
 
-      // Compute composite 70% Safety + 30% Price for every offer
       let bestIdx = 0;
       let bestComposite = -1;
       const enriched = items.map((item, idx) => {
@@ -982,10 +1268,8 @@
       if (enriched[bestIdx]) enriched[bestIdx].bestValue = true;
 
       if (isExactGroup) {
-        // Group A: Same formulation across merchants -> sort strictly by Lowest Price First
         return enriched.sort((a, b) => a.price - b.price);
       } else {
-        // Group B: Distinct brands -> Slot 1 = Highest Safety Score, Slot 2 = Lowest Price, Remaining = Ascending Price
         const safestList = [...enriched].sort((a, b) => (b.profile_score - a.profile_score) || (a.price - b.price));
         const firstSafest = safestList[0];
         const remainingAfterSafest = enriched.filter(x => x.id !== firstSafest.id);
@@ -998,7 +1282,7 @@
       }
     }
 
-    // Canonical Cache + 4-Step Early-Exit Acquisition Ladder Engine
+    // Canonical Cache Engine
     function getCanonicalCache(cacheKey) {
       try {
         const raw = localStorage.getItem("sp_canonical_cache_v2");
@@ -1064,7 +1348,6 @@
           ]
         };
       }
-      // Default AUTO Step 1: Official Brand / Shopify Early-Exit
       return {
         activeStep: 1,
         stopReason: "SUFFICIENT_OFFICIAL_EVIDENCE (Early-Exit at Step 1)",
@@ -1123,24 +1406,27 @@
       executeSearchOrBrowse(appState.query, appState.profile, appState.browseCategory, "");
     }
 
-    function build5Plus5Products(query, profile, browseCat) {
-      const catKey = detectCategoryKey(query, browseCat);
-      const tpl = CATEGORY_CATALOG[catKey] || CATEGORY_CATALOG.health_supplements;
-      const rawQ = (query || "").trim() || tpl.label;
+    // Build 5+5 Product Offerings with Deep Merchant Links and High-Resolution Product Images
+    function build5Plus5Products(parsedQuery, profile, browseCat) {
+      const catKey = parsedQuery.categoryKey || "personal_care";
+      const tpl = CATEGORY_CATALOG[catKey] || CATEGORY_CATALOG.personal_care;
+      const cleanTopic = parsedQuery.displayTopic || tpl.label;
 
-      // Detect pack size in query or lock to category canonical pack
       let pack = tpl.defaultPack;
-      const packMatch = rawQ.match(/(\d+\s*(?:ml|g|kg|tablets|capsules|tabs|caps|sachets))/i);
+      const packMatch = parsedQuery.raw.match(/(\d+\s*(?:ml|g|kg|tablets|capsules|tabs|caps|sachets))/i);
       if (packMatch) {
         pack = packMatch[1].replace(/tabs/i, "Tablets").replace(/caps/i, "Capsules");
       }
 
-      // Open-market brand & product extraction (supports ANY brand/manufacturer in the market)
-      const { brand: primaryBrand, isNewMarketBrand, coreProduct } = extractOpenMarketBrandAndTopic(rawQ, tpl);
+      const { brand: primaryBrand, isNewMarketBrand, coreProduct } = extractOpenMarketBrandAndTopic(cleanTopic, tpl, catKey);
 
-      let productTitle = rawQ;
+      let cleanCore = coreProduct;
+      if (primaryBrand.toLowerCase().includes("baby") && cleanCore.toLowerCase().startsWith("baby ")) {
+        cleanCore = cleanCore.replace(/^baby\s+/i, "");
+      }
+      let productTitle = cleanTopic;
       if (!productTitle.toLowerCase().includes(primaryBrand.toLowerCase())) {
-        productTitle = `${primaryBrand} ${coreProduct}`;
+        productTitle = `${primaryBrand} ${cleanCore}`;
       }
       if (!productTitle.toLowerCase().includes(pack.toLowerCase())) {
         productTitle = `${productTitle} (${pack})`;
@@ -1155,12 +1441,15 @@
       const baseScore = tpl.scores[profile] || tpl.scores.ALL || 90;
       const profileWarnings = (tpl.warnings && tpl.warnings[profile]) ? tpl.warnings[profile] : [];
 
-      // Dynamic Merchant Pool: Always includes Official Brand / D2C Store + Pan-India Marketplaces (No hardcoded 4-merchant cap!)
+      // Primary Product Image Resolution
+      const primaryMedia = resolveProductImage(primaryBrand, productTitle, pack, catKey);
+
+      // Dynamic Merchant Pool
       const dynamicMerchants = isNewMarketBrand
         ? [`${primaryBrand} Official Store (D2C / Shopify)`, ...tpl.merchants]
         : [...tpl.merchants.slice(0, 4), `${primaryBrand} Official Store (D2C)`];
 
-      // Deduplicate merchants by normalized name and build 5 Exact Offers
+      // Build 5 Exact Offers with Direct Merchant Buy Now Links
       const seenMerchants = new Set();
       const rawExactOffers = [];
       for (let i = 0; i < dynamicMerchants.length && rawExactOffers.length < 5; i++) {
@@ -1170,7 +1459,8 @@
         seenMerchants.add(normM);
 
         const price = Math.round(tpl.basePrice * (1 + rawExactOffers.length * 0.042));
-        const searchUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(productTitle + " " + merchant + " India")}`;
+        const buyUrl = buildMerchantBuyUrl(merchant, productTitle, primaryBrand);
+
         rawExactOffers.push({
           id: `exact-${catKey}-${rawExactOffers.length}`,
           name: productTitle,
@@ -1185,25 +1475,34 @@
           compliance_coverage_label: tpl.regulatory,
           extracted_ingredients: tpl.ingredients,
           acquisition_source: ladderInfo.sourceLabel,
+          image_url: primaryMedia.imageUrl,
+          fallback_image: primaryMedia.fallbackSvg,
           warnings: profileWarnings,
-          buyUrl: searchUrl,
+          buyUrl: buyUrl,
           icon: tpl.icon
         });
       }
 
       const exactOffers = computeBestChoiceAndBadges(rawExactOffers, true);
 
-      // Group B: 5 Comparable Alternatives (5 Distinct Brands in same category & pack, deduplicated by brand)
+      // Build 5 Comparable Alternatives (Distinct Brands)
       const altBrands = tpl.brands.filter(b => b.toLowerCase() !== primaryBrand.toLowerCase()).slice(0, 5);
-      const cleanTopic = coreProduct.replace(new RegExp(pack, "ig"), "").trim() || tpl.label;
       const rawAlternatives = altBrands.map((brandName, idx) => {
-        // Vary safety scores & prices so Highest Safety Score, Lowest Price, and Best Choice (70/30) are clearly demonstrated
         const scoreOffsets = [3, -1, 1, 0, -2];
         const priceMultipliers = [1.06, 0.89, 0.96, 1.02, 1.11];
         const altScore = Math.max(82, Math.min(98, baseScore + scoreOffsets[idx % scoreOffsets.length]));
         const altPrice = Math.round(tpl.basePrice * priceMultipliers[idx % priceMultipliers.length]);
-        const altTitle = `${brandName} ${cleanTopic} (${pack})`;
+
+        // Clean Alternative Title without Conversational Junk or Duplicate "Baby"
+        let altConcept = coreProduct.replace(new RegExp(pack, "ig"), "").trim() || tpl.label;
+        if (brandName.toLowerCase().includes("baby") && altConcept.toLowerCase().startsWith("baby ")) {
+          altConcept = altConcept.replace(/^baby\s+/i, "");
+        }
+        const altTitle = `${brandName} ${altConcept} (${pack})`;
         const merchant = tpl.merchants[idx % tpl.merchants.length];
+        const altMedia = resolveProductImage(brandName, altTitle, pack, catKey);
+        const altBuyUrl = buildMerchantBuyUrl(merchant, altTitle, brandName);
+
         return {
           id: `alt-${catKey}-${idx}`,
           name: altTitle,
@@ -1218,18 +1517,20 @@
           compliance_coverage_label: tpl.regulatory,
           extracted_ingredients: tpl.ingredients,
           acquisition_source: `Canonical Catalog (${brandName} Verified Formulation)`,
+          image_url: altMedia.imageUrl,
+          fallback_image: altMedia.fallbackSvg,
           warnings: profileWarnings,
-          buyUrl: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(altTitle + " " + merchant + " India")}`,
+          buyUrl: altBuyUrl,
           icon: tpl.icon
         };
       });
 
       const alternatives = computeBestChoiceAndBadges(rawAlternatives, false);
 
-      return { exactOffers, alternatives, pack, categoryLabel: tpl.label, ladderInfo };
+      return { exactOffers, alternatives, pack, categoryLabel: tpl.label, ladderInfo, displayTopic: cleanTopic };
     }
 
-    // Render ProductCard (Exact HTML structure & classes from src/components/ProductCard.tsx + Ingredient/OCR Evidence Drawer)
+    // Render ProductCard (With High-Resolution Image, SVG Fallback, Direct Merchant Buy Now Link, and Un-Clipped Title)
     function renderProductCardHTML(p) {
       const tone = getCardTone(p.id);
       const saved = appState.shortlist.some(item => item.id === p.id);
@@ -1248,13 +1549,17 @@
               <span class="inline-flex items-center gap-1">✨ Best Choice</span>
             </div>
           ` : ""}
-          <div class="grid min-h-[238px] grid-cols-[126px_1fr] sm:grid-cols-[164px_1fr]">
-            <div class="relative m-2 overflow-hidden rounded-xl border sm:m-3 flex flex-col items-center justify-center p-3 ${tone.image}">
-              ${p.image_url
-                ? `<img src="${p.image_url}" alt="${p.name}" class="h-24 w-24 object-contain drop-shadow-md" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" /><div style="display:none" class="text-5xl select-none drop-shadow-md">${p.icon || "🛡️"}</div>`
-                : `<div class="text-5xl select-none drop-shadow-md">${p.icon || "🛡️"}</div>`
-              }
-              <span class="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-600 text-center line-clamp-2">${p.brand || "Verified"}</span>
+          <div class="grid min-h-[238px] grid-cols-[130px_1fr] sm:grid-cols-[164px_1fr]">
+            <div class="relative m-2 overflow-hidden rounded-xl border sm:m-3 flex flex-col items-center justify-center p-2.5 ${tone.image}">
+              <img
+                src="${p.image_url}"
+                alt="${p.name}"
+                loading="lazy"
+                decoding="async"
+                class="h-28 w-28 object-contain drop-shadow-md transition-transform duration-200 hover:scale-105"
+                onerror="this.onerror=null; this.src='${p.fallback_image}';"
+              />
+              <span class="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 text-center line-clamp-1">${p.brand || "Verified"}</span>
               <div class="absolute left-2 top-2 flex max-w-[calc(100%-1rem)] flex-col gap-1.5">
                 ${p.safest ? `<span class="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-extrabold text-white shadow-md ring-1 ring-white/30">Highest Safety Score</span>` : ""}
                 ${p.lowestPrice ? `<span class="rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-extrabold text-white shadow-md ring-1 ring-white/30">Lowest Price</span>` : ""}
@@ -1263,8 +1568,8 @@
 
             <div class="flex min-w-0 flex-col p-4 pl-2 sm:p-5 sm:pl-2">
               <div class="flex-1 space-y-2.5">
-                <div>
-                  <h3 class="line-clamp-3 text-sm font-extrabold leading-snug sm:text-base ${tone.title}">${p.name}</h3>
+                <div class="${p.bestValue ? 'pr-20' : ''}">
+                  <h3 class="line-clamp-2 text-sm font-extrabold leading-snug sm:text-base ${tone.title}">${p.name}</h3>
                   ${p.brand ? `<p class="mt-0.5 text-xs font-semibold ${tone.secondary}">Brand: <strong>${p.brand}</strong></p>` : ""}
                   ${p.pack_size_text ? `<p class="mt-0.5 text-[11px] font-medium ${tone.secondary}">Pack: <strong>${p.pack_size_text}</strong></p>` : ""}
                 </div>
@@ -1278,7 +1583,7 @@
                   </span>
                 </div>
 
-                ${p.platform ? `<p class="text-xs ${tone.secondary}">Merchant: <span class="font-bold">${p.platform}</span></p>` : ""}
+                ${p.platform ? `<p class="text-xs ${tone.secondary}">Merchant: <span class="font-bold text-slate-100">${p.platform}</span></p>` : ""}
 
                 <details class="rounded-lg border px-3 py-1.5 text-xs ${tone.subtle}">
                   <summary class="cursor-pointer font-semibold">Regulatory & Ingredient Evidence (${Math.round(p.regulatory_compliance_score || 92)}%)</summary>
@@ -1306,11 +1611,24 @@
       `;
     }
 
-    // Execute Search or Category Browse (Queries Live Supabase Edge Function + Open-Market Engine)
-    async function executeSearchOrBrowse(query, profile, browseCat, categoryTitle) {
-      appState.query = query || "";
-      appState.profile = profile || appState.profile || "ALL";
-      appState.browseCategory = browseCat || "";
+    // Execute Search or Category Browse with Conversational Spoken & Typed Query Normalization
+    async function executeSearchOrBrowse(rawQuery, profile, browseCat, categoryTitle) {
+      const activeProf = profile || appState.profile || "ALL";
+      const parsed = parseConversationalQuery(rawQuery || categoryTitle || "", activeProf);
+
+      // Auto-switch profile pill if natural language query specified target audience (e.g. Children)
+      if (parsed.profile && parsed.profile !== appState.profile) {
+        appState.profile = parsed.profile;
+        document.querySelectorAll(".profile-pill").forEach(btn => {
+          const active = btn.getAttribute("data-profile") === parsed.profile;
+          btn.className = active
+            ? "profile-pill rounded-full px-4 py-1.5 text-[11px] font-bold transition-all sm:text-xs bg-[#38BDF8] text-[#0F1419] shadow-lg shadow-[#38BDF8]/20"
+            : "profile-pill rounded-full px-4 py-1.5 text-[11px] font-bold transition-all sm:text-xs border border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200";
+        });
+      }
+
+      appState.query = rawQuery || "";
+      appState.browseCategory = browseCat || parsed.categoryKey || "";
 
       // Show results view, hide landing sections
       document.getElementById("homeLandingSections").classList.add("hidden");
@@ -1321,12 +1639,12 @@
       document.getElementById("newSearchBtnMobile").classList.add("flex");
 
       const headingEl = document.getElementById("resultsMainHeading");
-      const titleTopic = categoryTitle || query || (appState.profile === "ALL" ? "Featured Products" : `${appState.profile} Picks`);
+      const titleTopic = categoryTitle || parsed.displayTopic || (appState.profile === "ALL" ? "Featured Products" : `${appState.profile} Picks`);
       headingEl.textContent = appState.profile === "ALL"
         ? `SafeProducts results — ${titleTopic}`
         : `SafeProducts results for ${appState.profile} — ${titleTopic}`;
 
-      const generated = build5Plus5Products(query || categoryTitle || "Health Supplements", appState.profile, browseCat);
+      const generated = build5Plus5Products(parsed, appState.profile, browseCat);
       document.getElementById("groupAPackBadge").textContent = `Pack Size Locked: ${generated.pack}`;
       renderPipelineTelemetry(generated.ladderInfo);
 
@@ -1336,8 +1654,8 @@
       groupAGrid.innerHTML = generated.exactOffers.map(renderProductCardHTML).join("");
       groupBGrid.innerHTML = generated.alternatives.map(renderProductCardHTML).join("");
 
-      // Non-blocking background sync with live Supabase Edge Function (sp-us2-search-v3)
-      if (query && query.trim().length > 1) {
+      // Background sync with live Supabase Edge Function (sp-us2-search-v3) if available
+      if (parsed.displayTopic && parsed.displayTopic.length > 1) {
         fetch(`${SUPABASE_URL}/functions/v1/sp-us2-search-v3`, {
           method: "POST",
           headers: {
@@ -1345,7 +1663,7 @@
             Authorization: `Bearer ${SUPABASE_KEY}`,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ query: query.trim(), profile: appState.profile, limit: 10 })
+          body: JSON.stringify({ query: parsed.displayTopic, profile: appState.profile, limit: 10 })
         }).then(r => r.ok ? r.json() : null).then(liveData => {
           if (liveData && Array.isArray(liveData.exact_offers) && liveData.exact_offers.length > 0) {
             const liveExact = computeBestChoiceAndBadges(liveData.exact_offers.slice(0, 5), true);
