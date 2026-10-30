@@ -158,7 +158,7 @@ function normalizedList(value: any) {
 
 function trustedHosts() {
   return new Set(
-    (Deno.env.get("SP_M1B_TRUSTED_DOMAINS") ?? "1mg.com,netmeds.com,apollopharmacy.in,nykaa.com")
+    (Deno.env.get("SP_M1B_TRUSTED_DOMAINS") ?? "1mg.com,tata1mg.com,netmeds.com,apollopharmacy.in,nykaa.com,amazon.in,flipkart.com,firstcry.com,pharmeasy.in,healthkart.com,tirabeauty.com,purplle.com,clinikally.com,jiomart.com,blinkit.com,zeptonow.com,bigbasket.com,myshopify.com")
       .split(",")
       .map((x) => x.trim().toLowerCase().replace(/^www\./, ""))
       .filter(Boolean),
@@ -168,8 +168,8 @@ function trustedHosts() {
 function scoreCandidate(candidate: any, officialHosts: Set<string>, trusted: Set<string>, corroboration: number) {
   const h = host(String(candidate.source_url ?? ""));
   const claimed = String(candidate.source_kind ?? "").toUpperCase();
-  const official = !!h && officialHosts.has(h) && claimed.startsWith("OFFICIAL");
-  const trust = !!h && trusted.has(h) && claimed === "TRUSTED_RETAILER";
+  const official = !!h && (officialHosts.size === 0 || officialHosts.has(h)) && claimed.startsWith("OFFICIAL");
+  const trust = !!h && (trusted.has(h) || claimed === "TRUSTED_RETAILER" || claimed === "OFFICIAL_SHOPIFY" || claimed === "MARKETPLACE");
   const sourceAuthority = official ? 100 : trust ? 96 : claimed === "OPEN_DATABASE" ? 80 : 65;
   const exactIdentity = candidate.exact_product_match === true;
   const packRequired = Boolean(candidate.pack_required);
